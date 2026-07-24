@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kindred Paws — A gentle place to plan, remember, and celebrate</title>
+<meta name="description" content="Record your pet's care wishes before the hardest day comes, and give them a beautiful place to be remembered after.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF5EC;
+    --cream-deep:#F1E9DA;
+    --amber:#D98A3D;
+    --amber-deep:#B96F28;
+    --dusk:#1F3A36;
+    --dusk-deep:#142623;
+    --dusk-line:#2C4A44;
+    --blush:#E8C9B8;
+    --ink:#2B241C;
+    --paper:#F3EEE3;
+    --gold-line:#E3A85C;
+    --radius:20px;
+    --max:1120px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    line-height:1.1;
+    margin:0 0 .5em;
+    letter-spacing:-0.01em;
+  }
+  p{margin:0 0 1em;}
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 28px;}
+  :focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:6px;}
+
+  .eyebrow{
+    font-family:'Inter',sans-serif;
+    font-size:.78rem;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    opacity:.7;
+    margin-bottom:.9em;
+    display:inline-block;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:.5em;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:.98rem;
+    padding:.95em 1.6em;
+    border-radius:999px;
+    text-decoration:none;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, background .2s ease, border-color .2s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--amber);color:#241505;}
+  .btn-primary:hover{background:var(--amber-deep);}
+  .btn-ghost-light{background:transparent;color:var(--paper);border-color:rgba(243,238,227,.45);}
+  .btn-ghost-light:hover{border-color:var(--paper);}
+  .btn-ghost-dark{background:transparent;color:var(--ink);border-color:rgba(43,36,28,.3);}
+  .btn-ghost-dark:hover{border-color:var(--ink);}
+
+  .btn[disabled]{opacity:.6;cursor:default;transform:none;}
+  .buy-error{margin-top:12px;font-size:.85rem;color:#B54A3B;}
+  
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(250,245,236,.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(43,36,28,.08);
+  }
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;}
+  .brand{display:flex;align-items:center;gap:.55em;font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;text-decoration:none;color:var(--ink);}
+  .brand svg{width:26px;height:26px;}
+  .nav-links{display:flex;gap:28px;list-style:none;margin:0;padding:0;font-size:.92rem;font-weight:500;}
+  .nav-links a{text-decoration:none;opacity:.8;}
+  .nav-links a:hover{opacity:1;}
+  .nav-cta{display:flex;align-items:center;gap:14px;}
+  @media (max-width:860px){.nav-links{display:none;}}
+
+  /* ---------- horizon divider (signature element) ---------- */
+  .horizon{position:relative;height:56px;overflow:visible;}
+  .horizon::before{
+    content:"";
+    position:absolute;left:0;right:0;top:50%;height:1px;
+    background:linear-gradient(90deg, transparent, var(--gold-line) 20%, var(--gold-line) 80%, transparent);
+    opacity:.55;
+  }
+  .horizon::after{
+    content:"";
+    position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;
+    background:var(--gold-line);
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 0 6px rgba(227,168,92,.18), 0 0 18px 2px rgba(227,168,92,.35);
+  }
+  .horizon--dusk::before{background:linear-gradient(90deg, transparent, #7CC6B4 15%, #E3A85C 55%, transparent);opacity:.4;}
+  .horizon--dusk::after{background:#E3A85C;box-shadow:0 0 0 7px rgba(227,168,92,.14), 0 0 22px 4px rgba(227,168,92,.4);}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:0;overflow:hidden;}
+  .hero-bg{
+    position:absolute;inset:0;
+    background:linear-gradient(100deg,
+      var(--cream) 0%, var(--cream-deep) 30%,
+      #3d5850 44%, var(--dusk) 58%, var(--dusk-deep) 100%);
+  }
+  .hero-bg::before{
+    content:"";position:absolute;inset:0;
+    background-image:radial-gradient(2px 2px at 68% 28%, rgba(255,255,255,.45) 0, transparent 60%),
+                      radial-gradient(1.5px 1.5px at 80% 15%, rgba(255,255,255,.35) 0, transparent 60%),
+                      radial-gradient(1.5px 1.5px at 72% 55%, rgba(255,255,255,.3) 0, transparent 60%),
+                      radial-gradient(2px 2px at 90% 68%, rgba(255,255,255,.4) 0, transparent 60%),
+                      radial-gradient(1px 1px at 86% 80%, rgba(255,255,255,.3) 0, transparent 60%);
+    opacity:.7;pointer-events:none;
+  }
+  .hero-row{
+    position:relative;z-index:3;
+    display:flex;align-items:center;justify-content:center;gap:36px;
+    max-width:1440px;margin:0 auto;padding:104px 32px 96px;
+  }
+  .hero-card{
+    background:var(--cream);border-radius:24px;
+    max-width:600px;padding:52px 46px;text-align:center;
+    box-shadow:0 34px 64px -18px rgba(15,12,8,.4), 0 10px 24px rgba(15,12,8,.15);
+  }
+  .hero h1{font-size:clamp(2rem,4vw,3rem);max-width:15ch;color:var(--ink);margin:0 auto;}
+  .hero-sub{font-size:1.1rem;max-width:40ch;opacity:.8;color:var(--ink);margin:18px auto 0;}
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:26px;}
+  .hero-labels{
+    position:absolute;bottom:22px;left:0;right:0;
+    display:grid;grid-template-columns:1fr 1fr;font-size:.78rem;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;z-index:3;
+  }
+  .hero-labels span{text-align:center;opacity:.5;}
+  .hero-labels .label-day{color:var(--ink);}
+  .hero-labels .label-dusk{color:var(--paper);}
+
+  .hero-photo{flex-shrink:0;display:none;z-index:2;}
+  .hero-photo--left{
+    width:190px;height:190px;object-fit:contain;
+    filter:drop-shadow(0 18px 34px rgba(0,0,0,.45));
+    transform:rotate(-6deg);
+  }
+  .hero-photo--right{
+    width:210px;height:210px;object-fit:contain;
+    filter:drop-shadow(0 18px 34px rgba(0,0,0,.45));
+    transform:rotate(5deg);
+  }
+  @media (min-width:1060px){ .hero-photo{display:block;} }
+
+  @media (max-width:640px){
+    .hero-row{padding:76px 22px 80px;}
+    .hero-card{padding:38px 26px;}
+  }
+
+  /* ---------- section base ---------- */
+  section{padding:96px 0;}
+  .section-cream{background:var(--cream);}
+  .section-dusk{background:var(--dusk-deep);color:var(--paper);}
+  .section-head{max-width:640px;margin:0 auto 56px;text-align:center;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.4rem);}
+  .section-head p{font-size:1.06rem;opacity:.78;}
+  .section-dusk .section-head p{opacity:.72;}
+
+  /* ---------- two moments ---------- */
+  .moments{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  .moment-card{
+    border-radius:var(--radius);padding:36px 32px;
+    border:1px solid rgba(43,36,28,.1);
+    background:var(--paper);
+  }
+  .moment-card .tag{
+    display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    padding:.35em .9em;border-radius:999px;margin-bottom:1em;
+  }
+  .moment-card.before .tag{background:rgba(217,138,61,.16);color:var(--amber-deep);}
+  .moment-card.after .tag{background:rgba(31,58,54,.1);color:var(--dusk);}
+  .moment-card ul{margin:1em 0 0;padding-left:1.15em;font-size:.96rem;opacity:.85;}
+  .moment-card li{margin-bottom:.4em;}
+  @media (max-width:760px){.moments{grid-template-columns:1fr;}}
+
+  /* ---------- how it works ---------- */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;counter-reset:step;}
+  .step{position:relative;padding-top:8px;}
+  .step .num{
+    font-family:'Fraunces',serif;font-size:2.4rem;font-weight:400;
+    color:var(--gold-line);margin-bottom:.3em;display:block;
+  }
+  .step h3{font-size:1.05rem;color:var(--paper);margin-bottom:.35em;}
+  .step p{font-size:.92rem;opacity:.7;margin:0;}
+  @media (max-width:860px){.steps{grid-template-columns:1fr 1fr;}}
+  @media (max-width:520px){.steps{grid-template-columns:1fr;}}
+
+  /* ---------- feature split (booklet / memorial) ---------- */
+  .feature{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+  .feature-reverse .feature-mock{order:2;}
+  .feature-reverse .feature-copy{order:1;}
+  .feature-copy h2{font-size:clamp(1.6rem,3vw,2.15rem);}
+  .feature-copy ul{list-style:none;margin:1.4em 0;padding:0;display:grid;gap:.7em;}
+  .feature-copy li{display:flex;gap:.6em;font-size:.98rem;align-items:flex-start;}
+  .feature-copy li svg{flex:none;margin-top:.2em;width:16px;height:16px;}
+  @media (max-width:860px){
+    .feature{grid-template-columns:1fr;gap:36px;}
+    .feature-reverse .feature-mock{order:1;}
+    .feature-reverse .feature-copy{order:2;}
+  }
+
+  /* booklet mockup */
+  .mock-booklet{
+    background:var(--paper);border-radius:18px;padding:30px 28px;
+    border:1px solid rgba(43,36,28,.1);
+    box-shadow:0 24px 48px -20px rgba(43,36,28,.25);
+    font-family:'Inter',sans-serif;
+  }
+  .mock-booklet .mh{font-family:'Fraunces',serif;font-size:1.1rem;margin-bottom:.2em;color:var(--dusk);}
+  .mock-booklet .ms{font-size:.82rem;opacity:.6;margin-bottom:1.3em;}
+  .mock-row{display:flex;align-items:center;gap:.7em;padding:.6em 0;border-top:1px solid rgba(43,36,28,.08);font-size:.92rem;}
+  .mock-check{width:18px;height:18px;border-radius:5px;border:1.5px solid rgba(43,36,28,.35);flex:none;}
+  .mock-check.on{background:var(--amber);border-color:var(--amber);position:relative;}
+  .mock-check.on::after{content:"";position:absolute;left:4px;top:1px;width:5px;height:9px;border:solid #241505;border-width:0 2px 2px 0;transform:rotate(40deg);}
+
+  /* memorial mockup */
+  .mock-memorial{
+    background:linear-gradient(165deg,#233F3A,#152825);
+    border-radius:18px;padding:28px;color:var(--paper);
+    box-shadow:0 24px 48px -20px rgba(0,0,0,.45);
+    border:1px solid rgba(227,168,92,.18);
+  }
+  .mock-memorial .photo{
+    width:64px;height:64px;border-radius:50%;
+    background:linear-gradient(140deg,#D9B48C,#B98850);
+    margin-bottom:14px;border:2px solid rgba(227,168,92,.5);
+  }
+  .mock-memorial h4{font-family:'Fraunces',serif;font-size:1.3rem;margin:0 0 .15em;font-weight:500;}
+  .mock-memorial .loved{font-size:.82rem;opacity:.65;margin-bottom:1.2em;}
+  .mock-candle{display:flex;align-items:center;gap:.5em;font-size:.85rem;opacity:.85;margin-bottom:14px;}
+  .mock-quote{
+    background:rgba(243,238,227,.06);border-left:2px solid var(--gold-line);
+    padding:.8em 1em;font-size:.88rem;font-style:italic;opacity:.85;border-radius:0 8px 8px 0;
+  }
+
+  /* celebration mini */
+  .celebration{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;}
+  .event-card{
+    background:var(--paper);border-radius:18px;padding:24px;border:1px solid rgba(43,36,28,.1);
+    display:flex;gap:18px;box-shadow:0 20px 40px -22px rgba(43,36,28,.3);
+  }
+  .event-date{
+    flex:none;width:64px;height:64px;border-radius:12px;background:var(--dusk);color:var(--paper);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Fraunces',serif;
+  }
+  .event-date .d{font-size:1.4rem;line-height:1;}
+  .event-date .m{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;opacity:.75;}
+  .event-card h4{margin:0 0 .3em;font-size:1.05rem;}
+  .event-card p{margin:0 0 .6em;font-size:.85rem;opacity:.7;}
+  .event-tag{display:inline-block;font-size:.72rem;font-weight:600;background:rgba(217,138,61,.15);color:var(--amber-deep);padding:.25em .7em;border-radius:999px;}
+  @media (max-width:860px){.celebration{grid-template-columns:1fr;gap:32px;}}
+
+  /* privacy */
+  .privacy-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .privacy-card{
+    border:1px solid rgba(43,36,28,.1);border-radius:16px;padding:26px;background:var(--paper);
+  }
+  .privacy-card h3{font-size:1.05rem;margin-bottom:.4em;}
+  .privacy-card p{font-size:.9rem;opacity:.72;margin:0;}
+  @media (max-width:760px){.privacy-grid{grid-template-columns:1fr;}}
+
+  /* partners */
+  .partners{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;}
+  .partners h2{font-size:clamp(1.6rem,3vw,2.1rem);}
+  @media (max-width:760px){.partners{grid-template-columns:1fr;text-align:center;}
+    .partners .btn-row{justify-content:center;}}
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;}
+
+  /* faq */
+  .faq{max-width:760px;margin:0 auto;}
+  details{border-top:1px solid rgba(43,36,28,.12);padding:20px 0;}
+  details:last-child{border-bottom:1px solid rgba(43,36,28,.12);}
+  summary{
+    cursor:pointer;font-family:'Fraunces',serif;font-size:1.08rem;font-weight:500;
+    list-style:none;display:flex;justify-content:space-between;align-items:center;gap:1em;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"+";font-family:'Inter',sans-serif;font-size:1.4rem;font-weight:400;color:var(--amber-deep);flex:none;transition:transform .2s ease;}
+  details[open] summary::after{transform:rotate(45deg);}
+  details p{margin:.8em 0 0;font-size:.96rem;opacity:.78;max-width:60ch;}
+
+  /* final cta */
+  .cta-final{
+    background:radial-gradient(120% 160% at 50% 0%, #2A4B45 0%, var(--dusk-deep) 60%);
+    color:var(--paper);text-align:center;
+  }
+  .cta-final h2{font-size:clamp(2rem,4vw,2.8rem);max-width:16ch;margin:0 auto .3em;}
+  .cta-final p{opacity:.72;max-width:44ch;margin:0 auto 2em;}
+  .cta-final .hero-ctas{margin-top:0;}
+
+  /* footer */
+  footer{background:var(--dusk-deep);color:var(--paper);padding:56px 0 32px;}
+  .footer-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:28px;margin-bottom:36px;}
+  .footer-brand{font-family:'Fraunces',serif;font-size:1.2rem;}
+  .footer-tag{opacity:.6;font-size:.9rem;max-width:32ch;margin-top:.5em;}
+  .footer-cols{display:flex;gap:56px;flex-wrap:wrap;}
+  .footer-col h5{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin:0 0 .9em;font-weight:600;}
+  .footer-col ul{list-style:none;margin:0;padding:0;display:grid;gap:.55em;font-size:.9rem;}
+  .footer-col a{text-decoration:none;opacity:.8;}
+  .footer-col a:hover{opacity:1;}
+  .footer-bottom{border-top:1px solid rgba(243,238,227,.12);padding-top:22px;font-size:.8rem;opacity:.5;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+  /* reveal animation */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a href="#top" class="brand">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-4-2.4-8-5.8-8-10A5 5 0 0 1 12 7a5 5 0 0 1 8 4c0 4.2-4 7.6-8 10Z" stroke="#D98A3D" stroke-width="1.4"/><circle cx="12" cy="12" r="2" fill="#D98A3D"/></svg>
+      Kindred Paws
+    </a>
+    <ul class="nav-links">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#booklet">The booklet</a></li>
+      <li><a href="#memorial">Memorial page</a></li>
+      <li><a href="#partners">For vets &amp; partners</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#booklet" class="btn btn-primary">Start their booklet</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-row">
+      <img src="images/pet-photo-1.webp" alt="A beloved pet" class="hero-photo hero-photo--left">
+      <div class="hero-card">
+        <span class="eyebrow">Pet end-of-life planning &amp; remembrance</span>
+        <h1>Everything you want for them. All in one gentle place.</h1>
+        <p class="hero-sub">Record your pet's care wishes before the hardest day comes, and give them a beautiful place to be remembered after.</p>
+        <div class="hero-ctas">
+          <a href="#booklet" class="btn btn-primary">Start their wishes booklet</a>
+          <a href="builder.html" class="btn btn-ghost-dark">Create a memorial page</a>
+        </div>
+      </div>
+      <img src="images/pet-photo-2.webp" alt="An illustrated portrait of a beloved pet" class="hero-photo hero-photo--right">
+    </div>
+    <div class="hero-labels" aria-hidden="true">
+      <span class="label-day">Before</span>
+      <span class="label-dusk">After</span>
+    </div>
+  </section>
+
+  <div class="horizon"></div>
+
+  <!-- TWO MOMENTS -->
+  <section class="section-cream">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">One product, two moments</span>
+        <h2>Nothing to guess. Nothing to figure out alone.</h2>
+        <p>Kindred Paws holds both halves of the story — the planning before, and the remembering after — as one continuous, gentle place.</p>
+      </div>
+      <div class="moments">
+        <div class="moment-card before reveal">
+          <span class="tag">Before</span>
+          <h3>The Wishes Booklet</h3>
+          <p>A calm, guided way to record your pet's routine, health, and end-of-life wishes — so nobody has to guess.</p>
+          <ul>
+            <li>Fill in as much or as little as you like</li>
+            <li>Printed, digital, or both</li>
+            <li>Shareable with your vet</li>
+          </ul>
+        </div>
+        <div class="moment-card after reveal">
+          <span class="tag">After</span>
+          <h3>The Memorial Page</h3>
+          <p>A lasting page for photos, stories, and condolences — public, unlisted, or just for you.</p>
+          <ul>
+            <li>Built from your booklet in minutes</li>
+            <li>Condolences, candles, and galleries</li>
+            <li>An optional life celebration event</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section-dusk" id="how">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">How it works</span>
+        <h2 style="color:var(--paper)">From the first page to the last goodbye</h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <span class="num">01</span>
+          <h3>Fill in a few gentle pages</h3>
+          <p>As much or as little as you like, whenever you're ready.</p>
+        </div>
+        <div class="step reveal">
+          <span class="num">02</span>
+          <h3>Keep it close</h3>
+          <p>Printed, digital, or both — shared with your vet if you'd like.</p>
+        </div>
+        <div class="step reveal">
+          <span class="num">03</span>
+          <h3>When the time comes</h3>
+          <p>Your booklet becomes the start of a memorial page, in minutes.</p>
+        </div>
+        <div class="step reveal">
+          <span class="num">04</span>
+          <h3>Others can gather round</h3>
+          <p>Condolences, a lit candle, and — if you choose — a celebration of their life.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="horizon horizon--dusk"></div>
+
+  <!-- BOOKLET FEATURE -->
+  <section class="section-cream" id="booklet">
+    <div class="wrap feature">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">The wishes booklet</span>
+        <h2>A calm place to put it in writing</h2>
+        <p>There's a decision every pet owner hopes they'll never have to make — and almost all of us do, eventually. This booklet won't make it painless. But it will mean you're not making it blind.</p>
+        <ul>
+          <li><svg viewBox="0 0 16 16"><path d="M2 8.5 6 12l8-8" stroke="#D98A3D" stroke-width="1.6" fill="none"/></svg>29 short, guided sections — never a blank page</li>
+          <li><svg viewBox="0 0 16 16"><path d="M2 8.5 6 12l8-8" stroke="#D98A3D" stroke-width="1.6" fill="none"/></svg>Care wishes, aftercare choices, and quality-of-life signs</li>
+          <li><svg viewBox="0 0 16 16"><path d="M2 8.5 6 12l8-8" stroke="#D98A3D" stroke-width="1.6" fill="none"/></svg>Printed booklet, digital PDF, or both</li>
+        </ul>
+        <a href="#" id="buy-booklet-btn" class="btn btn-primary">Start their wishes booklet — €19</a>
+        <div id="buy-booklet-error" class="buy-error" hidden></div>
+      </div>
+      <div class="feature-mock reveal">
+        <div class="mock-booklet">
+          <div class="mh">Signs my pet is still enjoying life</div>
+          <div class="ms">Tick what still feels true today</div>
+          <div class="mock-row"><span class="mock-check on"></span> Eats normally</div>
+          <div class="mock-row"><span class="mock-check on"></span> Greets me at the door</div>
+          <div class="mock-row"><span class="mock-check"></span> Seeks out sunny spots</div>
+          <div class="mock-row"><span class="mock-check on"></span> Plays, even briefly</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMORIAL FEATURE -->
+  <section class="section-dusk" id="memorial">
+    <div class="wrap feature feature-reverse">
+      <div class="feature-copy reveal">
+        <span class="eyebrow" style="color:var(--gold-line)">The memorial page</span>
+        <h2 style="color:var(--paper)">A lasting place to remember them</h2>
+        <p style="opacity:.78">A public, unlisted, or private page — with photos, their story, and a condolence book that friends and family can add to whenever they're ready.</p>
+        <ul>
+          <li><svg viewBox="0 0 16 16"><path d="M2 8.5 6 12l8-8" stroke="#E3A85C" stroke-width="1.6" fill="none"/></svg>Choose public, unlisted, or private — any time</li>
+          <li><svg viewBox="0 0 16 16"><path d="M2 8.5 6 12l8-8" stroke="#E3A85C" stroke-width="1.6" fill="none"/></svg>Moderated condolences, virtual candles</li>
+          <li><svg viewBox="0 0 16 16"><path d="M2 8.5 6 12l8-8" stroke="#E3A85C" stroke-width="1.6" fill="none"/></svg>A QR code that links straight from the booklet</li>
+        </ul>
+        <a href="builder.html" class="btn btn-ghost-light">Create a memorial page</a>
+      </div>
+      <div class="feature-mock reveal">
+        <div class="mock-memorial">
+          <div class="photo"></div>
+          <h4>Bramble</h4>
+          <div class="loved">Loved by the Doyle family · 2011–2026</div>
+          <div class="mock-candle">🕯️ 128 candles lit</div>
+          <div class="mock-quote">"Still the best welcome home we ever got. Sending love to you all."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="horizon horizon--dusk"></div>
+
+  <!-- CELEBRATION -->
+  <section class="section-cream">
+    <div class="wrap celebration">
+      <div class="reveal">
+        <span class="eyebrow">Life celebrations</span>
+        <h2>Some goodbyes deserve a gathering</h2>
+        <p>Announce a celebration of their life — in person or online — with RSVPs, a map, and a guestbook that lasts long after the day itself.</p>
+        <a href="#" class="btn btn-ghost-dark">See how it works</a>
+      </div>
+      <div class="event-card reveal">
+        <div class="event-date"><span class="d">14</span><span class="m">Sep</span></div>
+        <div>
+          <h4>A gathering for Bramble</h4>
+          <p>The back garden, 3pm · bring a favourite memory</p>
+          <span class="event-tag">Donations instead of flowers</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="section-cream" style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Your information is yours</span>
+        <h2>Choose exactly who can find their page</h2>
+      </div>
+      <div class="privacy-grid">
+        <div class="privacy-card reveal">
+          <h3>Public</h3>
+          <p>Findable and shareable — a lasting, open place to remember them.</p>
+        </div>
+        <div class="privacy-card reveal">
+          <h3>Unlisted</h3>
+          <p>Only visible to people you send the link to. Not searchable.</p>
+        </div>
+        <div class="privacy-card reveal">
+          <h3>Private</h3>
+          <p>Just for you. A quiet space, with no visitors unless you invite them.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTNERS -->
+  <section class="section-dusk" id="partners">
+    <div class="wrap partners reveal">
+      <div>
+        <span class="eyebrow" style="color:var(--gold-line)">For vets, crematoriums &amp; charities</span>
+        <h2 style="color:var(--paper)">Give your clients a calmer conversation</h2>
+        <p style="opacity:.75;max-width:52ch">Free for practices, crematoriums, rescue centres, and charities to recommend — a resource that reduces rushed, in-the-room decisions.</p>
+      </div>
+      <div class="btn-row">
+        <a href="#" class="btn btn-primary">Partner with us</a>
+        <a href="#" class="btn btn-ghost-light">See partner options</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="horizon horizon--dusk"></div>
+
+  <!-- FAQ -->
+  <section class="section-cream" id="faq">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Questions</span>
+        <h2>A few things people ask</h2>
+      </div>
+      <div class="faq reveal">
+        <details open>
+          <summary>Is this only for after my pet has died?</summary>
+          <p>No — most people start the booklet while their pet is healthy, simply to have it ready.</p>
+        </details>
+        <details>
+          <summary>Can I make the memorial page private?</summary>
+          <p>Yes. You choose public, unlisted, or fully private — and you can change it at any time.</p>
+        </details>
+        <details>
+          <summary>Does the booklet replace advice from my vet?</summary>
+          <p>No. It's a planning guide, not medical or legal advice — we always encourage a conversation with your vet.</p>
+        </details>
+        <details>
+          <summary>What happens to the page if I stop paying?</summary>
+          <p>Free memorial pages stay live indefinitely. Only enhanced features sit behind a subscription.</p>
+        </details>
+        <details>
+          <summary>Can I add a life celebration later?</summary>
+          <p>Yes, at any time — before or after the memorial page is already live.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="cta-final">
+    <div class="wrap reveal">
+      <h2>So nobody has to guess.</h2>
+      <p>Start with a few gentle pages, whenever you're ready.</p>
+      <div class="hero-ctas">
+        <a href="#booklet" class="btn btn-primary">Start their wishes booklet</a>
+        <a href="builder.html" class="btn btn-ghost-light">Create a memorial page</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">Kindred Paws</div>
+        <div class="footer-tag">A gentle place to plan, remember, and celebrate the life of a beloved pet.</div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h5>Product</h5>
+          <ul>
+            <li><a href="#booklet">The wishes booklet</a></li>
+            <li><a href="builder.html">Memorial pages</a></li>
+            <li><a href="#">Life celebrations</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Partners</h5>
+          <ul>
+            <li><a href="#partners">Vets &amp; clinics</a></li>
+            <li><a href="#partners">Crematoriums</a></li>
+            <li><a href="#partners">Charities &amp; rescues</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <ul>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Kindred Paws. A planning guide, not medical or legal advice.</span>
+      <span>Made with care, for every good life.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Reveal-on-scroll, respecting reduced-motion preference
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const els = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.15 });
+    els.forEach(el => io.observe(el));
+  } else {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+  }
+</script>
+
+<script>
+  // Wire the wishes-booklet purchase button to Stripe Checkout.
+  const buyBtn = document.getElementById('buy-booklet-btn');
+  const buyError = document.getElementById('buy-booklet-error');
+  if (buyBtn) {
+    buyBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      buyError.hidden = true;
+      const originalText = buyBtn.textContent;
+      buyBtn.setAttribute('disabled', 'true');
+      buyBtn.textContent = 'Starting checkout…';
+      try {
+        const res = await fetch('/.netlify/functions/create-checkout', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok || !data.url) throw new Error(data.error || 'Could not start checkout.');
+        window.location.href = data.url;
+      } catch (err) {
+        buyError.textContent = "We couldn't start checkout — please try again in a moment.";
+        buyError.hidden = false;
+        buyBtn.removeAttribute('disabled');
+        buyBtn.textContent = originalText;
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

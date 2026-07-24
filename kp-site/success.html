@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your booklet is ready — Kindred Paws</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF5EC; --dusk:#1F3A36; --dusk-deep:#142623;
+    --amber:#D98A3D; --amber-deep:#B96F28; --ink:#2B241C; --paper:#F3EEE3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',system-ui,sans-serif; background:var(--dusk-deep); color:var(--paper);
+    padding:32px;
+  }
+  .card{
+    max-width:520px; width:100%; background:var(--cream); color:var(--ink);
+    border-radius:24px; padding:48px 40px; text-align:center;
+    box-shadow:0 34px 64px -18px rgba(15,12,8,.4);
+  }
+  h1{font-family:'Fraunces',serif; font-weight:500; font-size:1.7rem; margin:0 0 .5em;}
+  p{opacity:.8; line-height:1.55; margin:0 0 1.6em;}
+  .btn{
+    display:inline-flex; align-items:center; gap:.5em; font-weight:600; font-size:1rem;
+    padding:.95em 1.8em; border-radius:999px; text-decoration:none; border:none;
+    background:var(--amber); color:#241505; cursor:pointer; transition:background .2s ease, transform .15s ease;
+  }
+  .btn:hover{background:var(--amber-deep); transform:translateY(-1px);}
+  .btn[disabled]{opacity:.5; cursor:default; transform:none;}
+  .state{font-size:.85rem; opacity:.65; margin-top:1.2em;}
+  .spinner{
+    width:34px;height:34px;border-radius:50%;margin:0 auto 18px;
+    border:3px solid rgba(43,36,28,.15); border-top-color:var(--amber);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .error{color:#B54A3B;}
+</style>
+</head>
+<body>
+
+  <div class="card" id="card">
+    <div class="spinner"></div>
+    <h1>Putting their name on the cover&hellip;</h1>
+    <p>One moment — we're personalizing the booklet now.</p>
+  </div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const card = document.getElementById('card');
+
+  function showReady(downloadUrl) {
+    card.innerHTML = `
+      <h1>Their booklet is ready.</h1>
+      <p>It's personalized and ready to download. Keep it somewhere safe — you can print it or fill it in on screen, whenever feels right.</p>
+      <a class="btn" href="${downloadUrl}" download>Download the booklet</a>
+      <div class="state">If the download doesn't start, use the button above — this link works whenever you need it.</div>
+    `;
+  }
+
+  function showError(message) {
+    card.innerHTML = `
+      <h1 class="error">Something went wrong</h1>
+      <p>${message}</p>
+      <a class="btn" href="/#booklet">Back to Kindred Paws</a>
+    `;
+  }
+
+  if (!sessionId) {
+    showError("We couldn't find your order. If you've just paid, check your email for a receipt and get in touch with us.");
+  } else {
+    const downloadUrl = `/.netlify/functions/get-booklet?session_id=${encodeURIComponent(sessionId)}`;
+    // Show the ready state immediately — the download link itself verifies
+    // payment server-side, so there's nothing to poll for here.
+    showReady(downloadUrl);
+  }
+</script>
+
+</body>
+</html>
