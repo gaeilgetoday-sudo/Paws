@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create a memorial page — Kindred Paws</title>
+<meta name="description" content="A lasting place to remember them — photos, their story, candles lit by the people who loved them, and messages from friends and family.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FAF5EC; --cream-deep:#F1E9DA;
+  --dusk:#1F3A36; --dusk-deep:#142623;
+  --amber:#D98A3D; --amber-deep:#B96F28;
+  --ink:#2B241C; --paper:#F3EEE3;
+  --muted:#8A7F6D; --line:#DCD0B4;
+  --gold:#E3A85C; --candle:#F2B24A;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--cream); color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif; line-height:1.6;
+}
+h1,h2,h3,h4{font-family:'Fraunces',serif; margin:0; font-weight:600; letter-spacing:-.01em;}
+p{margin:0;}
+a{color:inherit;}
+.wrap{max-width:940px; margin:0 auto; padding:0 24px;}
+.narrow{max-width:660px; margin:0 auto; padding:0 24px;}
+
+/* ---------- nav ---------- */
+nav{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 24px; max-width:1100px; margin:0 auto;
+}
+.brand{display:flex; align-items:center; gap:10px; font-family:'Fraunces',serif; font-size:1.05rem; text-decoration:none;}
+.brand svg{width:26px; height:26px;}
+.nav-back{font-size:.88rem; color:var(--muted); text-decoration:none;}
+.nav-back:hover{color:var(--ink);}
+
+/* ---------- hero ---------- */
+.hero{
+  background:radial-gradient(120% 100% at 50% 0%, #24423d 0%, var(--dusk-deep) 70%);
+  color:var(--paper); padding:76px 24px 84px; text-align:center;
+}
+.hero .eyebrow{
+  font-size:.76rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:14px;
+}
+.hero h1{font-size:2.9rem; line-height:1.12; max-width:600px; margin:0 auto;}
+.hero .sub{
+  margin:20px auto 0; max-width:520px; font-size:1.08rem; color:#CBDBD5;
+}
+
+/* ---------- glimpse ---------- */
+.glimpse-section{padding:0 24px; margin-top:-52px;}
+.glimpse{
+  max-width:520px; margin:0 auto;
+  border-radius:16px; overflow:hidden;
+  box-shadow:0 40px 80px -24px rgba(15,26,24,.55), 0 0 0 1px rgba(0,0,0,.06);
+  background:var(--cream);
+}
+.glimpse-bar{
+  background:#E8E0D0; padding:9px 12px; display:flex; gap:6px; align-items:center;
+  border-bottom:1px solid var(--line);
+}
+.glimpse-bar i{width:9px; height:9px; border-radius:50%; background:#C4B69C; display:block;}
+.glimpse-bar span{
+  margin-left:8px; font-size:.68rem; color:#8b7f68; font-family:'Inter',sans-serif;
+  background:#F5F0E4; padding:3px 10px; border-radius:99px;
+}
+.g-hero{
+  background:linear-gradient(165deg,#24423d,var(--dusk-deep)); color:var(--paper);
+  padding:26px 20px; text-align:center;
+}
+.g-paw{
+  width:52px; height:52px; margin:0 auto 12px; border-radius:50%;
+  background:rgba(227,168,92,.14); border:1px solid rgba(227,168,92,.3);
+  display:flex; align-items:center; justify-content:center;
+}
+.g-paw svg{width:24px; height:24px;}
+.g-eyebrow{font-size:.55rem; letter-spacing:.1em; font-weight:700; color:var(--gold); text-transform:uppercase;}
+.g-hero h4{font-size:1.5rem; margin:5px 0 3px;}
+.g-dates{font-family:'Fraunces',serif; font-style:italic; font-size:.72rem; color:#a9c4bc;}
+.g-body{padding:20px;}
+.g-label{
+  font-size:.55rem; letter-spacing:.08em; font-weight:700; text-transform:uppercase;
+  color:var(--amber-deep); margin-bottom:5px;
+}
+.g-line{height:5px; border-radius:99px; background:var(--cream-deep); margin-bottom:6px;}
+.g-tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:16px 0;}
+.g-tile{aspect-ratio:1; border-radius:8px;}
+.g-candles{
+  background:var(--dusk-deep); border-radius:12px; padding:16px; text-align:center; margin-top:16px;
+}
+.g-flames{font-size:.78rem; line-height:1.5; letter-spacing:1px;}
+.g-clabel{font-size:.5rem; letter-spacing:.1em; font-weight:700; color:#8fa39c; margin-top:5px;}
+
+/* ---------- sections ---------- */
+section{padding:64px 0;}
+.section-head{text-align:center; margin-bottom:40px;}
+.section-head .eyebrow{
+  font-size:.74rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--amber-deep); margin-bottom:9px;
+}
+.section-head h2{font-size:1.85rem;}
+.section-head p{color:var(--muted); margin-top:12px; max-width:480px; margin-left:auto; margin-right:auto;}
+
+/* ---------- includes ---------- */
+.includes{display:grid; grid-template-columns:repeat(2,1fr); gap:18px;}
+.inc{
+  background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:24px;
+}
+.inc-ico{
+  width:38px; height:38px; border-radius:11px; background:rgba(217,138,61,.13);
+  display:flex; align-items:center; justify-content:center; margin-bottom:14px; font-size:1.15rem;
+}
+.inc h3{font-size:1.08rem; margin-bottom:7px;}
+.inc p{font-size:.92rem; color:#4a4033;}
+
+/* ---------- promises ---------- */
+.section-dusk{background:var(--dusk-deep); color:var(--paper);}
+.section-dusk .section-head h2{color:var(--paper);}
+.section-dusk .section-head .eyebrow{color:var(--gold);}
+.section-dusk .section-head p{color:#a9c4bc;}
+.promises{display:flex; flex-direction:column; gap:2px; max-width:620px; margin:0 auto;}
+.promise{
+  display:flex; gap:16px; padding:20px 0; border-bottom:1px solid rgba(255,255,255,.09);
+  align-items:flex-start;
+}
+.promise:last-child{border-bottom:none;}
+.promise .tick{color:var(--gold); font-size:1rem; flex-shrink:0; line-height:1.5;}
+.promise h4{font-size:1rem; color:var(--paper); margin-bottom:4px;}
+.promise p{font-size:.9rem; color:#a9c4bc;}
+
+/* ---------- price / cta ---------- */
+.price-card{
+  background:var(--paper); border:1px solid var(--line); border-radius:22px;
+  padding:44px 32px; text-align:center; max-width:480px; margin:0 auto;
+  box-shadow:0 24px 50px -22px rgba(43,36,28,.18);
+}
+.price{font-family:'Fraunces',serif; font-size:3.1rem; line-height:1; color:var(--ink);}
+.price-note{font-size:.9rem; color:var(--muted); margin-top:8px;}
+.price-sub{font-size:.92rem; color:#4a4033; margin:20px auto 26px; max-width:330px;}
+.btn-primary{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--amber); color:#241505; font-weight:600; font-size:1rem;
+  padding:1em 2.1em; border-radius:999px; border:none; cursor:pointer; text-decoration:none;
+  transition:background .2s ease, transform .15s ease;
+}
+.btn-primary:hover{background:var(--amber-deep); transform:translateY(-1px);}
+.btn-primary[disabled]{opacity:.6; cursor:default; transform:none;}
+.buy-error{margin-top:14px; font-size:.86rem; color:#B54A3B; min-height:1.2em;}
+.secure{
+  margin-top:18px; font-size:.78rem; color:var(--muted);
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+
+/* ---------- faq ---------- */
+.faq{max-width:620px; margin:0 auto;}
+details{
+  border-bottom:1px solid var(--line); padding:16px 0;
+}
+summary{
+  cursor:pointer; font-weight:600; font-size:.98rem; list-style:none;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+}
+summary::-webkit-details-marker{display:none;}
+summary::after{content:'+'; color:var(--amber-deep); font-size:1.2rem; flex-shrink:0;}
+details[open] summary::after{content:'\2013';}
+details p{margin-top:10px; font-size:.92rem; color:#4a4033;}
+
+/* ---------- footer ---------- */
+footer{
+  background:var(--dusk-deep); color:#8fa39c; padding:44px 24px; text-align:center; font-size:.82rem;
+}
+footer .fbrand{color:var(--paper); font-family:'Fraunces',serif; font-size:1rem; margin-bottom:8px;}
+footer a{color:#a9c4bc; text-decoration:none;}
+footer a:hover{color:var(--paper);}
+
+@media (max-width:640px){
+  .hero h1{font-size:2.1rem;}
+  .includes{grid-template-columns:1fr;}
+  .price{font-size:2.6rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important;}
+  html{scroll-behavior:auto;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <ellipse cx="50" cy="62" rx="24" ry="19" fill="#D98A3D"/>
+      <ellipse cx="20" cy="38" rx="10" ry="13" fill="#D98A3D"/>
+      <ellipse cx="42" cy="24" rx="10" ry="13" fill="#D98A3D"/>
+      <ellipse cx="66" cy="24" rx="10" ry="13" fill="#D98A3D"/>
+      <ellipse cx="86" cy="40" rx="9" ry="12" fill="#D98A3D"/>
+    </svg>
+    Kindred Paws
+  </a>
+  <a class="nav-back" href="index.html">&larr; Back</a>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="eyebrow">The memorial page</div>
+  <h1>A lasting place to remember them.</h1>
+  <p class="sub">Their photos, their story, and room for everyone who loved them to show it — kept somewhere permanent, and shared only with the people you choose.</p>
+</header>
+
+<!-- ================= GLIMPSE ================= -->
+<div class="glimpse-section">
+  <div class="glimpse" role="img" aria-label="Preview of a finished memorial page, showing a photo, story, gallery, and lit candles.">
+    <div class="glimpse-bar">
+      <i></i><i></i><i></i>
+      <span>kindredpaws.com/shinny</span>
+    </div>
+    <div class="g-hero">
+      <div class="g-paw">
+        <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+          <ellipse cx="50" cy="62" rx="24" ry="19" fill="#E3A85C"/>
+          <ellipse cx="20" cy="38" rx="10" ry="13" fill="#E3A85C"/>
+          <ellipse cx="42" cy="24" rx="10" ry="13" fill="#E3A85C"/>
+          <ellipse cx="66" cy="24" rx="10" ry="13" fill="#E3A85C"/>
+          <ellipse cx="86" cy="40" rx="9" ry="12" fill="#E3A85C"/>
+        </svg>
+      </div>
+      <div class="g-eyebrow">A Kindred Paws memorial</div>
+      <h4>Shinny</h4>
+      <div class="g-dates">Golden Retriever &middot; 2015 &mdash; 2026</div>
+    </div>
+    <div class="g-body">
+      <div class="g-label">His story</div>
+      <div class="g-line" style="width:100%"></div>
+      <div class="g-line" style="width:94%"></div>
+      <div class="g-line" style="width:72%"></div>
+
+      <div class="g-tiles">
+        <div class="g-tile" style="background:linear-gradient(160deg,#3E5C46,#1F3A36)"></div>
+        <div class="g-tile" style="background:linear-gradient(160deg,#B96F28,#6E4A6E)"></div>
+        <div class="g-tile" style="background:linear-gradient(160deg,#C97B6B,#1F3A36)"></div>
+      </div>
+
+      <div class="g-candles">
+        <div class="g-flames">🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️</div>
+        <div class="g-clabel">CANDLES LIT</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= WHAT'S INCLUDED ================= -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">What's included</div>
+      <h2>Everything, from the start</h2>
+      <p>No tiers, no locked features, nothing to add on later. One page, complete.</p>
+    </div>
+
+    <div class="includes">
+      <div class="inc">
+        <div class="inc-ico" aria-hidden="true">🖼️</div>
+        <h3>Their photos</h3>
+        <p>A hero photograph and a gallery of the ones that make you smile — the sunbeam naps, the muddy walks, the daft ones.</p>
+      </div>
+      <div class="inc">
+        <div class="inc-ico" aria-hidden="true">✍️</div>
+        <h3>Their story, in your words</h3>
+        <p>How they came into your life, what made them themselves, and what you'd want people to remember. Gentle prompts if you'd like them.</p>
+      </div>
+      <div class="inc">
+        <div class="inc-ico" aria-hidden="true">🕯️</div>
+        <h3>Candles</h3>
+        <p>Anyone visiting can light a candle in one tap — no name needed, nothing to write. A quiet way to show they were thinking of them.</p>
+      </div>
+      <div class="inc">
+        <div class="inc-ico" aria-hidden="true">💬</div>
+        <h3>A guestbook</h3>
+        <p>Friends, family, and your vet can leave a memory or a kind word. Every message comes to you for approval before it appears.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROMISES ================= -->
+<section class="section-dusk">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Our promises to you</div>
+      <h2>The things that matter here</h2>
+      <p>This is a page about someone you loved. It shouldn't come with small print that works against you.</p>
+    </div>
+
+    <div class="promises">
+      <div class="promise">
+        <span class="tick" aria-hidden="true">✦</span>
+        <div>
+          <h4>You pay once. That's it.</h4>
+          <p>€29, one time. No subscription, no yearly renewal, no email a year from now asking you to pay again to keep their page alive.</p>
+        </div>
+      </div>
+      <div class="promise">
+        <span class="tick" aria-hidden="true">✦</span>
+        <div>
+          <h4>Private unless you decide otherwise</h4>
+          <p>Pages are unlisted by default — only reachable by people you send the link to. You can make it fully public or fully private at any time.</p>
+        </div>
+      </div>
+      <div class="promise">
+        <span class="tick" aria-hidden="true">✦</span>
+        <div>
+          <h4>Nothing appears without your say-so</h4>
+          <p>Every guestbook message waits for your approval first. You can remove anything, at any time, without explaining yourself to anyone.</p>
+        </div>
+      </div>
+      <div class="promise">
+        <span class="tick" aria-hidden="true">✦</span>
+        <div>
+          <h4>It stays up — and if we ever close, it still does</h4>
+          <p>Their page stays live for as long as Kindred Paws is running. If we ever cease operating, every page is converted to a permanent version kept at the same link for at least three years, never simply deleted.</p>
+        </div>
+      </div>
+      <div class="promise">
+        <span class="tick" aria-hidden="true">✦</span>
+        <div>
+          <h4>No advertising, ever</h4>
+          <p>Nobody is buying space on the page you make for them. Your €29 is the whole business model.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRICE / CTA ================= -->
+<section>
+  <div class="narrow">
+    <div class="price-card">
+      <div class="price">&euro;29</div>
+      <div class="price-note">once &middot; no subscription</div>
+      <p class="price-sub">You'll be able to build the page straight after — at your own pace, over as many sittings as you need. Nothing goes live until you publish it.</p>
+      <button class="btn-primary" id="buyMemorialBtn">Create their page</button>
+      <div class="buy-error" id="buyError" role="status" aria-live="polite"></div>
+      <div class="secure">
+        <span aria-hidden="true">🔒</span> Secure payment by Stripe
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Questions</div>
+      <h2>Before you start</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Do I have to finish it in one go?</summary>
+        <p>No. Once you've paid, you can come back and keep working on it whenever you're ready — and nothing is visible to anyone until you choose to publish. There's no rush and no deadline.</p>
+      </details>
+      <details>
+        <summary>Who will be able to see it?</summary>
+        <p>By default, only people you send the link to. You can also make it fully public, or keep it entirely private and visible only to you. You can change your mind at any point, before or after publishing.</p>
+      </details>
+      <details>
+        <summary>Can I stop people leaving messages?</summary>
+        <p>Yes. The guestbook can be switched off entirely, and when it's on, nothing appears until you've read and approved it. Candles are anonymous and carry no message, so there's nothing there to misuse.</p>
+      </details>
+      <details>
+        <summary>What if I already have the wishes booklet?</summary>
+        <p>Then most of the hard thinking is already done — their story, their favourite things, what you'd want people to remember. You can copy those answers straight across.</p>
+      </details>
+      <details>
+        <summary>Can I get a refund?</summary>
+        <p>Yes — if you change your mind before publishing the page, email us and we'll refund you in full, no questions asked.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fbrand">Kindred Paws&trade;</div>
+  <div><a href="index.html">Home</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="contact.html">Contact</a></div>
+</footer>
+
+<script>
+  const buyBtn = document.getElementById('buyMemorialBtn');
+  const buyError = document.getElementById('buyError');
+
+  buyBtn.addEventListener('click', async () => {
+    buyError.textContent = '';
+    const original = buyBtn.textContent;
+    buyBtn.disabled = true;
+    buyBtn.textContent = 'Starting checkout…';
+    try {
+      const res = await fetch('/.netlify/functions/create-memorial-checkout', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'Could not start checkout.');
+      window.location.href = data.url;
+    } catch (err) {
+      buyError.textContent = "We couldn't start checkout — please try again in a moment.";
+      buyBtn.disabled = false;
+      buyBtn.textContent = original;
+    }
+  });
+</script>
+
+</body>
+</html>

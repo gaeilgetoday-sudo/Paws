@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build their memorial page — Kindred Paws</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF5EC; --cream-deep:#F1E9DA;
+    --amber:#D98A3D; --amber-deep:#B96F28;
+    --dusk:#1F3A36; --dusk-deep:#142623;
+    --blush:#E8C9B8; --ink:#2B241C; --paper:#F3EEE3;
+    --gold-line:#E3A85C;
+    --line:rgba(43,36,28,.12);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--ink);
+    background:var(--cream-deep); -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:500;margin:0 0 .3em;letter-spacing:-0.01em;}
+  p{margin:0 0 1em;}
+  :focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:6px;}
+  button{font-family:inherit;}
+
+  [hidden]{display:none !important;}
+  .save-status{display:block;font-size:.72rem;margin-top:4px;opacity:.75;min-height:1em;}
+  .save-status[data-tone="ok"]{color:#3E5C46;}
+  .save-status[data-tone="warn"]{color:#B54A3B;}
+  .publish-error{margin-top:12px;font-size:.85rem;color:#B54A3B;min-height:1.1em;}
+  .app{max-width:920px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--cream);}
+
+  /* top bar */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:.5em;font-family:'Fraunces',serif;font-size:1.05rem;}
+  .brand svg{width:22px;height:22px;}
+  .brand small{font-family:'Inter',sans-serif;font-size:.72rem;opacity:.55;font-weight:500;display:block;margin-top:1px;}
+  .reassure{font-size:.78rem;opacity:.55;text-align:right;max-width:220px;}
+
+  /* breadcrumb stepper */
+  .stepper-wrap{padding:18px 28px 8px;}
+  .progress-track{height:3px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--gold-line),var(--dusk));transition:width .4s ease;width:0%;}
+  .crumbs{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;}
+  .crumb{
+    flex:none;font-size:.78rem;padding:.4em .8em;border-radius:999px;border:1px solid transparent;
+    background:none;color:var(--ink);opacity:.35;cursor:not-allowed;white-space:nowrap;font-weight:500;
+  }
+  .crumb.visited{opacity:.65;cursor:pointer;}
+  .crumb.visited:hover{background:rgba(43,36,28,.06);}
+  .crumb.current{opacity:1;background:var(--amber);color:#241505;font-weight:700;cursor:default;}
+
+  /* stage */
+  .stage{flex:1;padding:8px 28px 40px;}
+  .step-panel{max-width:620px;margin:0 auto;padding-top:24px;animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .step-panel[hidden]{display:none;}
+  .eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber-deep);display:block;margin-bottom:.6em;}
+  .step-panel h2{font-size:1.7rem;max-width:20ch;}
+  .step-sub{opacity:.68;font-size:.98rem;margin-bottom:1.8em;}
+
+  .field{margin-bottom:1.4em;}
+  .field label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.5em;}
+  .field .hint{font-weight:400;opacity:.55;font-size:.8rem;}
+  input[type=text],input[type=date],select,textarea{
+    width:100%;font-family:'Inter',sans-serif;font-size:1rem;padding:.85em 1em;
+    border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);
+  }
+  input[type=text]:focus,input[type=date]:focus,select:focus,textarea:focus{border-color:var(--amber);}
+  textarea{resize:vertical;min-height:140px;line-height:1.5;}
+  .name-input{font-family:'Fraunces',serif;font-size:1.6rem;text-align:center;padding:.5em .4em;border:none;border-bottom:2px solid var(--line);border-radius:0;background:transparent;}
+  .name-input:focus{border-color:var(--amber);outline:none;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1em;}
+  @media (max-width:560px){.grid-2{grid-template-columns:1fr;}}
+
+  .chips{display:flex;flex-wrap:wrap;gap:.5em;margin-bottom:1em;}
+  .chip{
+    font-size:.82rem;padding:.5em 1em;border-radius:999px;border:1px solid var(--line);
+    background:#fff;cursor:pointer;color:var(--ink);opacity:.8;
+  }
+  .chip:hover{opacity:1;border-color:var(--amber);}
+
+  /* dropzone */
+  .dropzone{
+    border:1.5px dashed var(--line);border-radius:var(--radius);padding:28px;text-align:center;
+    cursor:pointer;background:#fff;transition:border-color .2s ease;
+  }
+  .dropzone:hover{border-color:var(--amber);}
+  .dropzone p{margin:0;font-size:.9rem;opacity:.65;}
+  .hero-preview{
+    width:120px;height:120px;border-radius:50%;margin:0 auto 16px;
+    background:var(--blush) center/cover no-repeat;border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--amber-deep);
+  }
+  .photo-actions{text-align:center;margin-top:10px;}
+  .link-btn{background:none;border:none;color:var(--amber-deep);font-weight:600;font-size:.85rem;cursor:pointer;text-decoration:underline;}
+
+  .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin-top:16px;}
+  .thumb{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--blush) center/cover no-repeat;border:1px solid var(--line);}
+  .thumb button{
+    position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;
+    background:rgba(20,38,35,.75);color:#fff;border:none;font-size:.85rem;cursor:pointer;line-height:1;
+  }
+
+  /* privacy cards */
+  .privacy-card{
+    display:flex;gap:.9em;align-items:flex-start;padding:18px;border-radius:14px;
+    border:1.5px solid var(--line);background:#fff;margin-bottom:12px;cursor:pointer;
+  }
+  .privacy-card.selected{border-color:var(--amber);background:#FFF7EC;}
+  .privacy-card input{margin-top:.35em;accent-color:var(--amber);}
+  .privacy-card h3{font-size:1rem;margin-bottom:.15em;}
+  .privacy-card p{font-size:.85rem;opacity:.65;margin:0;}
+
+  /* switch */
+  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid var(--line);}
+  .switch-row:last-child{border-bottom:1px solid var(--line);}
+  .switch-row .lbl{font-size:.92rem;font-weight:600;}
+  .switch-row .sub{font-size:.8rem;opacity:.6;font-weight:400;}
+  .switch{position:relative;width:44px;height:26px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:var(--line);border-radius:999px;cursor:pointer;transition:.2s;}
+  .slider::before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .switch input:checked + .slider{background:var(--amber);}
+  .switch input:checked + .slider::before{transform:translateX(18px);}
+
+  /* celebration choice */
+  .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.6em;}
+  .choice-btn{
+    padding:1.4em 1em;border-radius:14px;border:1.5px solid var(--line);background:#fff;
+    cursor:pointer;font-weight:600;font-size:.95rem;text-align:center;
+  }
+  .choice-btn.selected{border-color:var(--amber);background:#FFF7EC;color:var(--amber-deep);}
+  .sub-form{padding:18px;border-radius:14px;background:#fff;border:1px solid var(--line);}
+  .sub-form[hidden]{display:none;}
+
+  /* preview */
+  .preview-page{
+    background:linear-gradient(165deg,#233F3A,#152825);border-radius:22px;padding:34px 30px;
+    color:var(--paper);position:relative;overflow:hidden;
+  }
+  .edit-pill{
+    position:absolute;top:14px;right:14px;font-size:.72rem;background:rgba(243,238,227,.12);
+    border:1px solid rgba(243,238,227,.25);color:var(--paper);padding:.3em .8em;border-radius:999px;cursor:pointer;
+  }
+  .preview-photo{width:88px;height:88px;border-radius:50%;background:var(--blush) center/cover no-repeat;border:2px solid var(--gold-line);margin-bottom:14px;}
+  .preview-page h2{color:var(--paper);font-size:1.8rem;margin-bottom:.1em;}
+  .preview-meta{font-size:.85rem;opacity:.65;margin-bottom:1.2em;}
+  .privacy-badge{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3em .8em;border-radius:999px;background:rgba(227,168,92,.18);color:var(--gold-line);margin-bottom:1.2em;}
+  .preview-story{font-size:.95rem;line-height:1.6;opacity:.88;white-space:pre-wrap;margin-bottom:1.4em;}
+  .preview-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:1.4em;}
+  .preview-gallery div{aspect-ratio:1;border-radius:8px;background:var(--blush) center/cover no-repeat;}
+  .preview-section-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.5;margin-bottom:.6em;}
+  .preview-condolence{background:rgba(243,238,227,.06);border-left:2px solid var(--gold-line);padding:.8em 1em;border-radius:0 8px 8px 0;font-size:.88rem;font-style:italic;opacity:.85;margin-bottom:.6em;}
+  .preview-event{background:rgba(227,168,92,.1);border:1px solid rgba(227,168,92,.25);border-radius:12px;padding:14px;font-size:.88rem;}
+  .preview-candles{background:rgba(243,238,227,.06);border-radius:10px;padding:.9em 1em;margin-bottom:1.4em;font-size:.9rem;letter-spacing:1px;}
+  .preview-candles span{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;opacity:.5;margin-top:.5em;}
+  .preview-modnote{font-size:.78rem;opacity:.55;margin-bottom:1.4em;}
+
+  /* publish */
+  .publish-box{text-align:center;padding:20px 0;}
+  .link-field{
+    display:flex;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:6px 6px 6px 16px;
+    align-items:center;margin:20px 0;
+  }
+  .link-field input{border:none;flex:1;font-size:.9rem;background:none;}
+  .copy-btn{
+    background:var(--amber);color:#241505;border:none;border-radius:8px;padding:.6em 1.1em;font-weight:600;font-size:.85rem;cursor:pointer;
+  }
+  .copy-btn.copied{background:var(--dusk);color:var(--paper);}
+  .qr-wrap{display:flex;justify-content:center;margin:22px 0;}
+  canvas{border-radius:10px;border:1px solid var(--line);background:#fff;}
+  .share-block{margin-top:8px;border-top:1px solid var(--line);padding-top:22px;}
+  .share-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;}
+  .share-item .txt{flex:1;font-size:.85rem;opacity:.75;}
+  .share-item .chan{font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;opacity:.55;display:block;margin-bottom:.3em;}
+
+  /* footer actions */
+  .actions{
+    display:flex;justify-content:space-between;align-items:center;padding:20px 28px;
+    border-top:1px solid var(--line);background:var(--cream);position:sticky;bottom:0;
+  }
+  .btn{font-weight:600;font-size:.95rem;padding:.9em 1.7em;border-radius:999px;border:1.5px solid transparent;cursor:pointer;}
+  .btn-primary{background:var(--amber);color:#241505;}
+  .btn-primary:hover{background:var(--amber-deep);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-back{background:none;border-color:var(--line);color:var(--ink);}
+  .btn-back:hover{border-color:var(--ink);}
+  .skip{font-size:.85rem;opacity:.55;background:none;border:none;cursor:pointer;text-decoration:underline;}
+
+  #hero-file, #memory-files{display:none;}
+
+  /* ---------- access gate ---------- */
+  /* Shown by default and only removed once payment is confirmed server-side,
+     so the builder stays locked even if scripts fail or someone edits the URL. */
+  .gate{
+    position:fixed;inset:0;z-index:200;background:var(--dusk-deep);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;padding:28px;text-align:center;
+  }
+  .gate[hidden]{display:none;}
+  .gate-inner{max-width:420px;}
+  .gate h2{color:var(--paper);font-size:1.5rem;margin-bottom:.5em;}
+  .gate p{opacity:.75;font-size:.95rem;}
+  .gate .btn-primary{display:inline-block;text-decoration:none;margin-top:1em;}
+  .gate-spinner{
+    width:32px;height:32px;border-radius:50%;margin:0 auto 20px;
+    border:3px solid rgba(243,238,227,.18);border-top-color:var(--amber);
+    animation:gspin .8s linear infinite;
+  }
+  @keyframes gspin{to{transform:rotate(360deg);}}
+
+  /* ---------- not-live warning ---------- */
+  .not-live{
+    background:#FFF3E0;border:1.5px solid var(--amber);border-radius:14px;
+    padding:16px 18px;margin-bottom:22px;font-size:.88rem;line-height:1.5;
+  }
+  .not-live strong{display:block;margin-bottom:.3em;color:var(--amber-deep);}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Access gate: visible by default, removed only after server-side verification -->
+<div class="gate" id="gate">
+  <div class="gate-inner" id="gateInner">
+    <div class="gate-spinner" id="gateSpinner"></div>
+    <h2 id="gateTitle">Just a moment…</h2>
+    <p id="gateMsg">Checking your access.</p>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+
+  <div class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-4-2.4-8-5.8-8-10A5 5 0 0 1 12 7a5 5 0 0 1 8 4c0 4.2-4 7.6-8 10Z" stroke="#D98A3D" stroke-width="1.4"/><circle cx="12" cy="12" r="2" fill="#D98A3D"/></svg>
+      <div>Kindred Paws<small>Memorial page builder</small></div>
+    </div>
+    <div class="reassure">Nothing here is public until you publish it, at the very last step.<span class="save-status" id="saveStatus"></span></div>
+  </div>
+
+  <div class="stepper-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="crumbs" id="crumbs"></div>
+  </div>
+
+  <div class="stage">
+
+    <!-- STEP 1 : START -->
+    <section class="step-panel" data-step="1">
+      <span class="eyebrow">Step 1 of 10 · Start</span>
+      <h2 style="text-align:center;">Let's create a place to remember them.</h2>
+      <p class="step-sub" style="text-align:center;">Just their name to begin — everything else can wait until you're ready.</p>
+      <div class="field">
+        <input type="text" id="petName" class="name-input" placeholder="Their name" autocomplete="off">
+      </div>
+    </section>
+
+    <!-- STEP 2 : DETAILS -->
+    <section class="step-panel" data-step="2" hidden>
+      <span class="eyebrow">Step 2 of 10 · Details</span>
+      <h2>Tell us a little about <span id="nameEcho2">them</span>.</h2>
+      <p class="step-sub">All optional — add whatever feels right.</p>
+      <div class="field">
+        <label for="species">Species / breed</label>
+        <select id="species">
+          <option value="">Choose one</option>
+          <option>Dog</option><option>Cat</option><option>Horse</option>
+          <option>Rabbit</option><option>Bird</option><option>Other</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="born">Born / adopted <span class="hint">optional</span></label>
+          <input type="date" id="born">
+        </div>
+        <div class="field">
+          <label for="died">Date they died</label>
+          <input type="date" id="died">
+        </div>
+      </div>
+      <div class="field">
+        <label for="lovedBy">Loved by <span class="hint">e.g. "The Doyle family"</span></label>
+        <input type="text" id="lovedBy" placeholder="Loved by...">
+      </div>
+    </section>
+
+    <!-- STEP 3 : PHOTO -->
+    <section class="step-panel" data-step="3" hidden>
+      <span class="eyebrow">Step 3 of 10 · Photo</span>
+      <h2>Choose the photo that feels most like them.</h2>
+      <p class="step-sub">This will be the first thing people see.</p>
+      <div class="hero-preview" id="heroPreview">🐾</div>
+      <div class="dropzone" id="heroDrop">
+        <p><strong style="color:var(--amber-deep)">Click to upload</strong> a photo, or drag one here</p>
+      </div>
+      <input type="file" id="hero-file" accept="image/*">
+      <div class="photo-actions"><button class="link-btn" id="skipPhoto" type="button">Skip for now</button></div>
+    </section>
+
+    <!-- STEP 4 : STORY -->
+    <section class="step-panel" data-step="4" hidden>
+      <span class="eyebrow">Step 4 of 10 · Story</span>
+      <h2>In your own words.</h2>
+      <p class="step-sub">As much or as little as you'd like — a starting prompt might help.</p>
+      <div class="chips">
+        <button class="chip" type="button" data-prompt="How did they come into your life?">How did they come into your life?</button>
+        <button class="chip" type="button" data-prompt="A memory that always makes me smile">A memory that always makes me smile</button>
+        <button class="chip" type="button" data-prompt="What made them, them">What made them, them</button>
+      </div>
+      <div class="field">
+        <textarea id="story" placeholder="Start writing whenever you're ready..."></textarea>
+      </div>
+    </section>
+
+    <!-- STEP 5 : MEMORIES -->
+    <section class="step-panel" data-step="5" hidden>
+      <span class="eyebrow">Step 5 of 10 · Memories</span>
+      <h2>Add a few photos that make you smile.</h2>
+      <p class="step-sub">Up to 8 for now — you can always add more later.</p>
+      <div class="dropzone" id="memDrop">
+        <p><strong style="color:var(--amber-deep)">Click to add photos</strong>, or drag several here</p>
+      </div>
+      <input type="file" id="memory-files" accept="image/*" multiple>
+      <div class="thumbs" id="thumbs"></div>
+    </section>
+
+    <!-- STEP 6 : PRIVACY -->
+    <section class="step-panel" data-step="6" hidden>
+      <span class="eyebrow">Step 6 of 10 · Privacy</span>
+      <h2>Who should be able to find this page?</h2>
+      <p class="step-sub">You can change this at any time, even after publishing.</p>
+      <label class="privacy-card" data-val="public">
+        <input type="radio" name="privacy" value="public">
+        <div><h3>Public</h3><p>Findable and shareable — a lasting, open place to remember them.</p></div>
+      </label>
+      <label class="privacy-card selected" data-val="unlisted">
+        <input type="radio" name="privacy" value="unlisted" checked>
+        <div><h3>Unlisted</h3><p>Only visible to people you send the link to. Not searchable.</p></div>
+      </label>
+      <label class="privacy-card" data-val="private">
+        <input type="radio" name="privacy" value="private">
+        <div><h3>Private</h3><p>Just for you. No visitors unless you invite them.</p></div>
+      </label>
+    </section>
+
+    <!-- STEP 7 : GUESTBOOK -->
+    <section class="step-panel" data-step="7" hidden>
+      <span class="eyebrow">Step 7 of 10 · Guestbook</span>
+      <h2>Would you like others to leave a message?</h2>
+      <p class="step-sub">You can turn this off, or close it, at any time.</p>
+      <div class="switch-row">
+        <div><span class="lbl">Allow guestbook messages</span></div>
+        <label class="switch"><input type="checkbox" id="condOn" checked><span class="slider"></span></label>
+      </div>
+      <div class="switch-row">
+        <div><span class="lbl">Review messages before they're shown</span><br><span class="sub">Recommended — links get forwarded, so even an unlisted page can reach people you didn't invite</span></div>
+        <label class="switch"><input type="checkbox" id="modOn" checked><span class="slider"></span></label>
+      </div>
+      <p class="step-sub" style="margin-top:1.4em;font-size:.88rem;">Lighting a candle is always available and always anonymous — there's no message attached, so there's nothing there to misuse.</p>
+      <div class="field" style="margin-top:20px;">
+        <label for="closeAfter">Automatically close the guestbook</label>
+        <select id="closeAfter">
+          <option value="never">Never — leave it open</option>
+          <option value="8w">After 8 weeks</option>
+          <option value="6m">After 6 months</option>
+          <option value="1y">After 1 year</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- STEP 8 : CELEBRATION -->
+    <section class="step-panel" data-step="8" hidden>
+      <span class="eyebrow">Step 8 of 10 · Life celebration</span>
+      <h2>Would you like to invite people to a gathering?</h2>
+      <p class="step-sub">Entirely optional — and easy to add later if you're not sure yet.</p>
+      <div class="choice-row">
+        <button class="choice-btn" id="celebNow" type="button">Add one now</button>
+        <button class="choice-btn selected" id="celebLater" type="button">Maybe later</button>
+      </div>
+      <div class="sub-form" id="celebForm" hidden>
+        <div class="field">
+          <label for="celebTitle">Event title</label>
+          <input type="text" id="celebTitle" placeholder="e.g. A gathering for Bramble">
+        </div>
+        <div class="grid-2">
+          <div class="field"><label for="celebDate">Date &amp; time</label><input type="date" id="celebDate"></div>
+          <div class="field"><label for="celebLoc">Location or online link</label><input type="text" id="celebLoc" placeholder="e.g. The back garden, 3pm"></div>
+        </div>
+        <div class="switch-row">
+          <span class="lbl" style="font-weight:500;">Children welcome</span>
+          <label class="switch"><input type="checkbox" id="celebKids"><span class="slider"></span></label>
+        </div>
+        <div class="switch-row">
+          <span class="lbl" style="font-weight:500;">Bring a memory or photo</span>
+          <label class="switch"><input type="checkbox" id="celebMemory" checked><span class="slider"></span></label>
+        </div>
+        <div class="switch-row">
+          <span class="lbl" style="font-weight:500;">Donations instead of flowers</span>
+          <label class="switch"><input type="checkbox" id="celebDonations"><span class="slider"></span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 9 : PREVIEW -->
+    <section class="step-panel" data-step="9" hidden>
+      <span class="eyebrow">Step 9 of 10 · Preview</span>
+      <h2>Here's how <span id="nameEcho9">their</span> page will look.</h2>
+      <p class="step-sub">Nothing is public yet — this is just for you.</p>
+      <div class="preview-page" id="previewPage"></div>
+    </section>
+
+    <!-- STEP 10 : PUBLISH -->
+    <section class="step-panel" data-step="10" hidden>
+      <span class="eyebrow">Step 10 of 10 · Publish &amp; share</span>
+      <div id="prePublish">
+        <h2 style="text-align:center;">Ready to share <span id="nameEcho10">their</span> page?</h2>
+        <p class="step-sub" style="text-align:center;">You can still change anything — including who can see it — after publishing.</p>
+        <div class="publish-box">
+          <button class="btn btn-primary" id="publishBtn" type="button">Publish page</button>
+          <div class="publish-error" id="publishError" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+      <div id="postPublish" hidden>
+        <h2 style="text-align:center;">Published.</h2>
+        <p class="step-sub" style="text-align:center;">Share it however feels right — there's no rush.</p>
+        <div class="link-field">
+          <input type="text" id="pageLink" readonly>
+          <button class="copy-btn" id="copyLink" type="button">Copy link</button>
+        </div>
+        <div class="qr-wrap"><canvas id="qrCanvas" width="132" height="132"></canvas></div>
+        <div class="share-block">
+          <div class="share-item">
+            <div class="txt"><span class="chan">WhatsApp / text</span><span id="shareText1"></span></div>
+            <button class="copy-btn" data-copy-target="shareText1" type="button">Copy</button>
+          </div>
+          <div class="share-item">
+            <div class="txt"><span class="chan">Email</span><span id="shareText2"></span></div>
+            <button class="copy-btn" data-copy-target="shareText2" type="button">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-back" id="backBtn" type="button">Back</button>
+    <button class="btn btn-primary" id="nextBtn" type="button">Continue</button>
+  </div>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// ACCESS GATE
+// The builder stays locked until Stripe confirms the €29 payment. Never trusts
+// the URL alone — the session_id is only a claim, verified server-side.
+//
+// INTERIM: the reference is kept in localStorage so a refresh or a closed tab
+// doesn't lock someone out of something they've paid for. This is a stopgap
+// until the magic-link + stored-record work lands; it's per-browser only, so
+// it won't survive a different device or cleared site data.
+// ---------------------------------------------------------------------------
+(function(){
+  const STORE_KEY = 'kp_memorial_access';
+  const gate = document.getElementById('gate');
+  const spinner = document.getElementById('gateSpinner');
+  const title = document.getElementById('gateTitle');
+  const msg = document.getElementById('gateMsg');
+
+  function lock(headline, body, showBuyLink, showSignIn){
+    spinner.hidden = true;
+    title.textContent = headline;
+    msg.textContent = body;
+    const inner = document.getElementById('gateInner');
+    if(showBuyLink){
+      const a = document.createElement('a');
+      a.className = 'btn btn-primary';
+      a.href = 'memorial.html';
+      a.textContent = 'See what\u2019s included';
+      inner.appendChild(a);
+    }
+    if(showSignIn){
+      const a = document.createElement('a');
+      a.className = 'btn btn-primary';
+      a.href = 'manage.html';
+      a.textContent = 'Email me a new link';
+      inner.appendChild(a);
+    }
+  }
+
+  function unlock(info){
+    window.KP_ACCESS = info;              // reference + email, for the save step later
+    gate.hidden = true;
+    document.getElementById('app').hidden = false;
+    document.dispatchEvent(new Event('kp-unlocked'));
+  }
+
+  const params = new URLSearchParams(location.search);
+  const urlSession = params.get('session_id');
+  const urlToken = params.get('token');
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch(e){}
+
+  // A magic-link token is exchanged for the reference before anything else,
+  // so someone can get back in on a device that has never seen this page.
+  if(urlToken){
+    fetch('/.netlify/functions/redeem-link?token=' + encodeURIComponent(urlToken))
+      .then(r => r.json().then(d => ({ok:r.ok, d})))
+      .then(({ok, d}) => {
+        if(ok && d.ok){
+          try { localStorage.setItem(STORE_KEY, JSON.stringify({reference:d.reference, email:d.email})); } catch(e){}
+          history.replaceState({}, '', location.pathname);
+          unlock({ reference:d.reference, email:d.email });
+        }else{
+          lock('That link has expired.',
+               'Sign-in links work once and last 30 minutes. You can request a fresh one.', false, true);
+        }
+      })
+      .catch(() => lock('We couldn\u2019t reach the server.', 'Please check your connection and refresh.', false, false));
+    return;
+  }
+
+  const sessionId = urlSession || (stored && stored.reference);
+
+  if(!sessionId){
+    lock('This page needs a memorial to work on.',
+         'Memorial pages are \u20ac29, once. If you already have one, we can email you a link back to it.',
+         true, true);
+    return;
+  }
+
+  fetch('/.netlify/functions/verify-memorial-access?session_id=' + encodeURIComponent(sessionId))
+    .then(r => r.json().then(d => ({ok:r.ok, d})))
+    .then(({ok, d}) => {
+      if(ok && d.paid){
+        try { localStorage.setItem(STORE_KEY, JSON.stringify({reference:d.reference, email:d.email})); } catch(e){}
+        // Drop the session id from the address bar so it isn't shared by accident.
+        if(urlSession) history.replaceState({}, '', location.pathname);
+        unlock(d);
+      } else if(d && d.reason === 'unpaid'){
+        lock('That payment didn\u2019t complete.',
+             'Nothing was charged. You can try again whenever you\u2019re ready.', true);
+      } else {
+        lock('We couldn\u2019t confirm this link.',
+             'If you\u2019ve already paid, use the link from your confirmation page or receipt email.', true);
+      }
+    })
+    .catch(() => {
+      lock('We couldn\u2019t reach the server.',
+           'Please check your connection and refresh the page.', false);
+    });
+})();
+</script>
+
+<script>
+(function(){
+  const steps = ['Start','Details','Photo','Story','Memories','Privacy','Guestbook','Celebration','Preview','Publish'];
+  const total = steps.length;
+  let current = 1;
+  let maxReached = 1;
+
+  const state = {
+    name:'', species:'', born:'', died:'', lovedBy:'',
+    photo:null, story:'', memories:[],
+    privacy:'unlisted', condOn:true, modOn:true, closeAfter:'never',
+    celebEnabled:false, celebTitle:'', celebDate:'', celebLoc:'', celebKids:false, celebMemory:true, celebDonations:false,
+    published:false
+  };
+
+  // ---------- crumbs ----------
+  const crumbsEl = document.getElementById('crumbs');
+  steps.forEach((label,i)=>{
+    const n = i+1;
+    const b = document.createElement('button');
+    b.className = 'crumb';
+    b.type = 'button';
+    b.textContent = (n) + '. ' + label;
+    b.dataset.step = n;
+    b.addEventListener('click', ()=>{ if(n <= maxReached) goTo(n); });
+    crumbsEl.appendChild(b);
+  });
+
+  function refreshCrumbs(){
+    [...crumbsEl.children].forEach((b,i)=>{
+      const n = i+1;
+      b.classList.remove('visited','current');
+      if(n === current) b.classList.add('current');
+      else if(n <= maxReached) b.classList.add('visited');
+    });
+    document.getElementById('progressFill').style.width = ((current-1)/(total-1)*100) + '%';
+  }
+
+  function goTo(n){
+    document.querySelector('.step-panel[data-step="'+current+'"]').hidden = true;
+    current = n;
+    if(n > maxReached) maxReached = n;
+    document.querySelector('.step-panel[data-step="'+current+'"]').hidden = false;
+    refreshCrumbs();
+    document.getElementById('backBtn').style.visibility = (current===1)?'hidden':'visible';
+    document.getElementById('nextBtn').style.display = (current===total)?'none':'inline-block';
+    if(current===9) renderPreview();
+    if(current===10) resetPublishView();
+    validateStep();
+    document.querySelector('.stage').scrollTo({top:0,behavior:'smooth'});
+  }
+
+  document.getElementById('backBtn').addEventListener('click', ()=>{ if(current>1) goTo(current-1); });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{ if(current<total) goTo(current+1); });
+
+  function validateStep(){
+    const nextBtn = document.getElementById('nextBtn');
+    if(current === 1){ nextBtn.disabled = state.name.trim().length === 0; }
+    else { nextBtn.disabled = false; }
+  }
+
+  // ---------- step 1 : name ----------
+  const petName = document.getElementById('petName');
+  petName.addEventListener('input', e=>{
+    state.name = e.target.value;
+    const disp = state.name.trim() || 'them';
+    ['nameEcho2','nameEcho9','nameEcho10'].forEach(id=>{ document.getElementById(id).textContent = disp; });
+    validateStep();
+    queueSave();
+  });
+
+  // ---------- step 2 : details ----------
+  document.getElementById('species').addEventListener('change', e=>{ state.species = e.target.value; queueSave(); });
+  document.getElementById('born').addEventListener('change', e=>{ state.born = e.target.value; queueSave(); });
+  document.getElementById('died').addEventListener('change', e=>{ state.died = e.target.value; queueSave(); });
+  document.getElementById('lovedBy').addEventListener('input', e=>{ state.lovedBy = e.target.value; queueSave(); });
+
+  // ---------- step 3 : photo ----------
+  const heroFile = document.getElementById('hero-file');
+  const heroPreview = document.getElementById('heroPreview');
+  document.getElementById('heroDrop').addEventListener('click', ()=> heroFile.click());
+  heroFile.addEventListener('change', async e=>{
+    const f = e.target.files[0]; if(!f) return;
+    heroPreview.textContent = '…';
+    try{
+      state.photo = await resizeImage(f, 900, 0.85);
+      heroPreview.style.backgroundImage = 'url(' + state.photo + ')';
+      heroPreview.textContent = '';
+      queueSave();
+    }catch(err){ heroPreview.textContent = '🐾'; }
+  });
+  document.getElementById('skipPhoto').addEventListener('click', ()=> goTo(4));
+
+  // ---------- step 4 : story ----------
+  const storyEl = document.getElementById('story');
+  storyEl.addEventListener('input', e=>{ state.story = e.target.value; queueSave(); });
+  document.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const prompt = chip.dataset.prompt;
+      const insert = (storyEl.value ? storyEl.value + '\n\n' : '') + prompt + '\n';
+      storyEl.value = insert;
+      state.story = insert;
+      storyEl.focus();
+      storyEl.setSelectionRange(insert.length, insert.length);
+      queueSave();
+    });
+  });
+
+  // ---------- step 5 : memories ----------
+  const memFiles = document.getElementById('memory-files');
+  const thumbsEl = document.getElementById('thumbs');
+  document.getElementById('memDrop').addEventListener('click', ()=> memFiles.click());
+  memFiles.addEventListener('change', async e=>{
+    const files = [...e.target.files].slice(0, 8 - state.memories.length);
+    for(const f of files){
+      try{
+        state.memories.push(await resizeImage(f, 1200, 0.82));
+        renderThumbs();
+      }catch(err){ /* skip anything the browser can't decode */ }
+    }
+    queueSave();
+  });
+  function renderThumbs(){
+    thumbsEl.innerHTML = '';
+    state.memories.forEach((src,i)=>{
+      const d = document.createElement('div');
+      d.className = 'thumb';
+      d.style.backgroundImage = 'url(' + src + ')';
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.textContent = '×'; btn.setAttribute('aria-label','Remove photo');
+      btn.addEventListener('click', ()=>{ state.memories.splice(i,1); renderThumbs(); queueSave(); });
+      d.appendChild(btn);
+      thumbsEl.appendChild(d);
+    });
+  }
+
+  // ---------- step 6 : privacy ----------
+  document.querySelectorAll('.privacy-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      document.querySelectorAll('.privacy-card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      card.querySelector('input').checked = true;
+      state.privacy = card.dataset.val;
+      queueSave();
+    });
+  });
+
+  // ---------- step 7 : condolences ----------
+  document.getElementById('condOn').addEventListener('change', e=>{ state.condOn = e.target.checked; queueSave(); });
+  document.getElementById('modOn').addEventListener('change', e=>{ state.modOn = e.target.checked; queueSave(); });
+  document.getElementById('closeAfter').addEventListener('change', e=>{ state.closeAfter = e.target.value; queueSave(); });
+
+  // ---------- step 8 : celebration ----------
+  const celebNow = document.getElementById('celebNow');
+  const celebLater = document.getElementById('celebLater');
+  const celebForm = document.getElementById('celebForm');
+  celebNow.addEventListener('click', ()=>{
+    state.celebEnabled = true;
+    celebNow.classList.add('selected'); celebLater.classList.remove('selected');
+    celebForm.hidden = false;
+  });
+  celebLater.addEventListener('click', ()=>{
+    state.celebEnabled = false;
+    celebLater.classList.add('selected'); celebNow.classList.remove('selected');
+    celebForm.hidden = true;
+  });
+  document.getElementById('celebTitle').addEventListener('input', e=>{ state.celebTitle = e.target.value; queueSave(); });
+  document.getElementById('celebDate').addEventListener('change', e=>{ state.celebDate = e.target.value; queueSave(); });
+  document.getElementById('celebLoc').addEventListener('input', e=>{ state.celebLoc = e.target.value; queueSave(); });
+  document.getElementById('celebKids').addEventListener('change', e=>{ state.celebKids = e.target.checked; queueSave(); });
+  document.getElementById('celebMemory').addEventListener('change', e=>{ state.celebMemory = e.target.checked; queueSave(); });
+  document.getElementById('celebDonations').addEventListener('change', e=>{ state.celebDonations = e.target.checked; queueSave(); });
+
+  // ---------- step 9 : preview ----------
+  function renderPreview(){
+    const name = state.name.trim() || 'Their name';
+    const dates = (state.born || state.died) ? (state.born||'—') + ' – ' + (state.died||'—') : '';
+    const loved = state.lovedBy ? 'Loved by ' + state.lovedBy : '';
+    const meta = [loved, dates].filter(Boolean).join(' · ');
+    const privacyLabel = {public:'Public',unlisted:'Unlisted',private:'Private'}[state.privacy];
+
+    let html = '';
+    html += '<button class="edit-pill" data-jump="2">Edit</button>';
+    html += '<div class="preview-photo" style="' + (state.photo ? 'background-image:url('+state.photo+')' : '') + '"></div>';
+    html += '<h2>' + name + '</h2>';
+    if(meta) html += '<div class="preview-meta">' + meta + '</div>';
+    html += '<span class="privacy-badge">' + privacyLabel + '</span>';
+    if(state.story) html += '<div class="preview-story">' + escapeHtml(state.story) + '</div>';
+    if(state.memories.length){
+      html += '<div class="preview-section-label">Gallery</div>';
+      html += '<div class="preview-gallery">' + state.memories.map(m=>'<div style="background-image:url('+m+')"></div>').join('') + '</div>';
+    }
+    // Candles appear on every published page — no setup, nothing to configure.
+    html += '<div class="preview-section-label">Candles</div>';
+    html += '<div class="preview-candles">🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️<span>lit by visitors</span></div>';
+    if(state.condOn){
+      html += '<div class="preview-section-label">Guestbook</div>';
+      html += '<div class="preview-condolence">"Thinking of you all — ' + name + ' was one in a million."</div>';
+      if(state.modOn){
+        html += '<div class="preview-modnote">Messages wait for your approval before they appear here.</div>';
+      }
+    }
+    if(state.celebEnabled){
+      html += '<div class="preview-section-label">Life celebration</div>';
+      html += '<div class="preview-event"><strong>' + (state.celebTitle || 'A gathering for ' + name) + '</strong><br>' +
+              (state.celebDate || 'Date TBC') + (state.celebLoc ? ' · ' + state.celebLoc : '') + '</div>';
+    }
+    document.getElementById('previewPage').innerHTML = html;
+    document.querySelector('.edit-pill').addEventListener('click', ()=> goTo(2));
+  }
+  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ---------- persistence ----------
+  // Photos are resized in the browser before saving. A modern phone photo is
+  // several megabytes; unresized, eight of them would make a record too large
+  // to store and painfully slow to load on the memorial page itself.
+  function resizeImage(file, maxDim, quality){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('decode failed'));
+        img.onload = () => {
+          let { width, height } = img;
+          if(width > maxDim || height > maxDim){
+            const scale = maxDim / Math.max(width, height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const saveStatus = document.getElementById('saveStatus');
+  let saveTimer = null;
+  let saving = false;
+
+  function setSaveStatus(text, tone){
+    saveStatus.textContent = text;
+    saveStatus.dataset.tone = tone || '';
+  }
+
+  function payload(){
+    return {
+      reference: (window.KP_ACCESS && window.KP_ACCESS.reference) || null,
+      email: (window.KP_ACCESS && window.KP_ACCESS.email) || null,
+      name: state.name, species: state.species, born: state.born, died: state.died,
+      lovedBy: state.lovedBy, photo: state.photo, story: state.story,
+      memories: state.memories, privacy: state.privacy,
+      guestbookOn: state.condOn, moderationOn: state.modOn, closeAfter: state.closeAfter,
+      celebEnabled: state.celebEnabled, celebTitle: state.celebTitle,
+      celebDate: state.celebDate, celebLoc: state.celebLoc,
+      celebKids: state.celebKids, celebMemory: state.celebMemory,
+      celebDonations: state.celebDonations
+    };
+  }
+
+  async function saveNow(){
+    if(saving || !window.KP_ACCESS) return;
+    saving = true;
+    setSaveStatus('Saving…');
+    try{
+      const res = await fetch('/.netlify/functions/save-memorial', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload())
+      });
+      const d = await res.json();
+      if(!res.ok || !d.ok) throw new Error(d.error || 'save failed');
+      state.id = d.id;
+      setSaveStatus('Saved', 'ok');
+    }catch(err){
+      setSaveStatus("Couldn't save — we'll keep trying", 'warn');
+    }finally{
+      saving = false;
+    }
+  }
+
+  // Debounced: typing a story shouldn't fire a request per keystroke.
+  window.queueSave = function(){
+    setSaveStatus('');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 1200);
+  };
+
+  async function loadExisting(){
+    if(!window.KP_ACCESS) return;
+    try{
+      const res = await fetch('/.netlify/functions/load-memorial?reference=' +
+        encodeURIComponent(window.KP_ACCESS.reference));
+      const d = await res.json();
+      if(!d.ok || !d.memorial) return;
+      const m = d.memorial;
+      Object.assign(state, {
+        id:m.id, name:m.name||'', species:m.species||'', born:m.born||'', died:m.died||'',
+        lovedBy:m.lovedBy||'', photo:m.photo||null, story:m.story||'', memories:m.memories||[],
+        privacy:m.privacy||'unlisted', condOn:m.guestbookOn !== false, modOn:m.moderationOn !== false,
+        closeAfter:m.closeAfter||'never', celebEnabled:!!m.celebEnabled, celebTitle:m.celebTitle||'',
+        celebDate:m.celebDate||'', celebLoc:m.celebLoc||'', celebKids:!!m.celebKids,
+        celebMemory:m.celebMemory !== false, celebDonations:!!m.celebDonations,
+        published:!!m.published, slug:m.slug||null
+      });
+      hydrateForm();
+      if(m.published) showPublished(m.slug);
+      if(m.name) setSaveStatus('Draft restored', 'ok');
+    }catch(e){ /* a fresh start is the correct fallback */ }
+  }
+
+  function hydrateForm(){
+    document.getElementById('petName').value = state.name;
+    document.getElementById('species').value = state.species;
+    document.getElementById('born').value = state.born;
+    document.getElementById('died').value = state.died;
+    document.getElementById('lovedBy').value = state.lovedBy;
+    document.getElementById('story').value = state.story;
+    document.getElementById('condOn').checked = state.condOn;
+    document.getElementById('modOn').checked = state.modOn;
+    document.getElementById('closeAfter').value = state.closeAfter;
+    if(state.photo){
+      const p = document.getElementById('heroPreview');
+      p.style.backgroundImage = 'url(' + state.photo + ')';
+      p.textContent = '';
+    }
+    document.querySelectorAll('.privacy-card').forEach(c=>{
+      const on = c.dataset.val === state.privacy;
+      c.classList.toggle('selected', on);
+      c.querySelector('input').checked = on;
+    });
+    if(state.celebEnabled){
+      document.getElementById('celebNow').classList.add('selected');
+      document.getElementById('celebLater').classList.remove('selected');
+      document.getElementById('celebForm').hidden = false;
+      document.getElementById('celebTitle').value = state.celebTitle;
+      document.getElementById('celebDate').value = state.celebDate;
+      document.getElementById('celebLoc').value = state.celebLoc;
+    }
+    renderThumbs();
+    validateStep();
+  }
+
+  function showPublished(slug){
+    document.getElementById('prePublish').hidden = true;
+    document.getElementById('postPublish').hidden = false;
+    const link = location.origin + '/remember.html?p=' + slug;
+    document.getElementById('pageLink').value = link;
+    drawFakeQR(document.getElementById('qrCanvas'), link);
+    const name = state.name.trim() || 'them';
+    document.getElementById('shareText1').textContent = 'We made a page to remember ' + name + ' — ' + link;
+    document.getElementById('shareText2').textContent = 'Hi — I wanted to share a page we made to remember ' + name + '. You can see it here: ' + link;
+  }
+
+  // ---------- step 10 : publish ----------
+  function resetPublishView(){
+    if(!state.published){
+      document.getElementById('prePublish').hidden = false;
+      document.getElementById('postPublish').hidden = true;
+    }
+  }
+  document.getElementById('publishBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('publishBtn');
+    btn.disabled = true; btn.textContent = 'Publishing…';
+    try{
+      await saveNow();
+      const res = await fetch('/.netlify/functions/publish-memorial', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ reference: window.KP_ACCESS.reference, published:true })
+      });
+      const d = await res.json();
+      if(!res.ok || !d.ok) throw new Error(d.error || 'publish failed');
+      state.published = true; state.slug = d.slug;
+      showPublished(d.slug);
+    }catch(err){
+      document.getElementById('publishError').textContent =
+        (err.message === 'Add their name before publishing.')
+          ? err.message : "That didn't work — please try again in a moment.";
+      btn.disabled = false; btn.textContent = 'Publish page';
+    }
+  });
+
+  document.getElementById('copyLink').addEventListener('click', function(){ copyText(document.getElementById('pageLink').value, this); });
+  document.querySelectorAll('[data-copy-target]').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      copyText(document.getElementById(btn.dataset.copyTarget).textContent, this);
+    });
+  });
+  function copyText(text, btn){
+    const done = ()=>{
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(()=>{ btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+    } else { fallbackCopy(text,done); }
+  }
+  function fallbackCopy(text, done){
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta); done();
+  }
+
+  // deterministic fake QR pattern — visual only, not a real scannable code
+  function drawFakeQR(canvas, text){
+    const ctx = canvas.getContext('2d');
+    const size = 21, cell = canvas.width / size;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#152825';
+    let hash = 0;
+    for(let i=0;i<text.length;i++){ hash = (hash * 31 + text.charCodeAt(i)) >>> 0; }
+    function rand(x,y){ hash = (hash ^ (x*97+y*57)) >>> 0; hash = (hash * 1103515245 + 12345) >>> 0; return (hash >> 16) % 2; }
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        const inFinder = (x<7&&y<7) || (x>size-8&&y<7) || (x<7&&y>size-8);
+        if(inFinder) continue;
+        if(rand(x,y)) ctx.fillRect(x*cell, y*cell, cell, cell);
+      }
+    }
+    [[0,0],[size-7,0],[0,size-7]].forEach(([fx,fy])=>{
+      ctx.fillStyle = '#152825'; ctx.fillRect(fx*cell, fy*cell, 7*cell, 7*cell);
+      ctx.fillStyle = '#fff'; ctx.fillRect((fx+1)*cell, (fy+1)*cell, 5*cell, 5*cell);
+      ctx.fillStyle = '#152825'; ctx.fillRect((fx+2)*cell, (fy+2)*cell, 3*cell, 3*cell);
+    });
+  }
+
+  refreshCrumbs();
+  validateStep();
+
+  // Draft restore waits for the gate: there's no reference to load against until then.
+  if(window.KP_ACCESS) loadExisting();
+  else document.addEventListener('kp-unlocked', loadExisting, { once:true });
+})();
+</script>
+
+</body>
+</html>

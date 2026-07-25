@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — Kindred Paws</title>
+<meta name="description" content="Get in touch with Kindred Paws. A real person reads every message.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#FAF5EC;--cream-deep:#F1E9DA;--dusk:#1F3A36;--dusk-deep:#142623;
+--amber:#D98A3D;--amber-deep:#B96F28;--ink:#2B241C;--paper:#F3EEE3;--muted:#8A7F6D;
+--line:#DCD0B4;--gold:#E3A85C;--warn:#B54A3B;--ok:#3E5C46;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.65;}
+h1,h2,h3{font-family:'Fraunces',serif;margin:0;font-weight:600;}
+p{margin:0;}
+a{color:var(--amber-deep);}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:6px;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;max-width:1100px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:1.05rem;text-decoration:none;color:inherit;}
+.brand svg{width:26px;height:26px;}
+.nav-back{font-size:.88rem;color:var(--muted);text-decoration:none;}
+.hero{background:linear-gradient(165deg,#24423d,var(--dusk-deep));color:var(--paper);padding:56px 24px;text-align:center;}
+.hero .eyebrow{font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.hero h1{font-size:2.3rem;}
+.hero p{margin-top:12px;color:#C9DAD3;max-width:460px;margin-left:auto;margin-right:auto;}
+.wrap{max-width:640px;margin:0 auto;padding:44px 24px 72px;}
+
+.quick{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:36px;}
+.quick h2{font-size:1.05rem;margin-bottom:12px;}
+.quick dl{margin:0;}
+.quick dt{font-weight:600;font-size:.93rem;margin-top:14px;}
+.quick dt:first-of-type{margin-top:0;}
+.quick dd{margin:2px 0 0;font-size:.91rem;color:#4a4033;}
+
+form{display:flex;flex-direction:column;gap:16px;}
+.field label{display:block;font-weight:600;font-size:.9rem;margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;font-family:inherit;font-size:1rem;padding:.8em 1em;border-radius:12px;
+  border:1.5px solid var(--line);background:#fff;color:var(--ink);
+}
+.field textarea{min-height:150px;resize:vertical;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--amber);outline:none;}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+.btn{align-self:flex-start;font-family:inherit;font-weight:600;font-size:1rem;padding:.9em 2em;
+border-radius:999px;border:none;cursor:pointer;background:var(--amber);color:#241505;
+transition:background .2s ease,transform .15s ease;}
+.btn:hover{background:var(--amber-deep);transform:translateY(-1px);}
+.btn[disabled]{opacity:.55;cursor:default;transform:none;}
+.result{padding:16px 18px;border-radius:12px;font-size:.93rem;}
+.result.ok{background:rgba(62,92,70,.1);border:1px solid rgba(62,92,70,.35);color:var(--ok);}
+.result.err{background:rgba(181,74,59,.08);border:1px solid rgba(181,74,59,.35);color:var(--warn);}
+.sent{text-align:center;padding:40px 20px;}
+.sent h2{font-size:1.4rem;margin-bottom:.5em;}
+.sent p{color:var(--muted);}
+.note{font-size:.86rem;color:var(--muted);margin-top:4px;}
+.hidden{display:none !important;}
+footer{background:var(--dusk-deep);color:#8fa39c;text-align:center;padding:40px 24px;font-size:.82rem;}
+footer .fbrand{color:var(--paper);font-family:'Fraunces',serif;font-size:1rem;margin-bottom:8px;}
+footer a{color:#a9c4bc;text-decoration:none;}
+@media(max-width:560px){.hero h1{font-size:1.8rem}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <ellipse cx="50" cy="62" rx="24" ry="19" fill="#D98A3D"/><ellipse cx="20" cy="38" rx="10" ry="13" fill="#D98A3D"/>
+      <ellipse cx="42" cy="24" rx="10" ry="13" fill="#D98A3D"/><ellipse cx="66" cy="24" rx="10" ry="13" fill="#D98A3D"/>
+      <ellipse cx="86" cy="40" rx="9" ry="12" fill="#D98A3D"/>
+    </svg>
+    Kindred Paws
+  </a>
+  <a class="nav-back" href="index.html">&larr; Back</a>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow">Contact</div>
+  <h1>Talk to a person</h1>
+  <p>There's no support queue and no chatbot here. Messages go to a real inbox and get a real reply.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="quick">
+    <h2>Some things you can sort out faster yourself</h2>
+    <dl>
+      <dt>Can't get back into your memorial page?</dt>
+      <dd>Go to <a href="manage.html">manage your page</a> and enter your email — we'll send you a
+      link straight back in. It works even on a new phone or computer.</dd>
+
+      <dt>Someone left a message you don't want on the page?</dt>
+      <dd>Sign in at <a href="manage.html">manage your page</a> and hide or delete it. You never
+      need our permission, and you don't have to explain why.</dd>
+
+      <dt>Wrote a message on someone else's page and want it removed?</dt>
+      <dd>Send it below under "Privacy or data request" and we'll delete it. You don't need the
+      page owner's agreement.</dd>
+
+      <dt>Booklet didn't download?</dt>
+      <dd>Use the link on your confirmation page again — it stays valid. If that's gone, message
+      us with the email address you paid with.</dd>
+    </dl>
+  </div>
+
+  <div id="formView">
+    <h2 style="font-size:1.3rem;margin-bottom:6px;">Send a message</h2>
+    <p class="note" style="margin-bottom:22px;">We usually reply within a day or two. If it's about
+    losing access to a page, say so and we'll prioritise it.</p>
+
+    <form id="contactForm" novalidate>
+      <div class="field">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" autocomplete="name" maxlength="80">
+      </div>
+
+      <div class="field">
+        <label for="email">Your email</label>
+        <input type="email" id="email" name="email" autocomplete="email" maxlength="160" required>
+        <p class="note">So we can reply. We don't add anyone to a mailing list.</p>
+      </div>
+
+      <div class="field">
+        <label for="topic">What's it about?</label>
+        <select id="topic" name="topic">
+          <option value="general">A general question</option>
+          <option value="booklet">The wishes booklet</option>
+          <option value="memorial">A memorial page</option>
+          <option value="access">I can't get into my page</option>
+          <option value="privacy">Privacy or a data request</option>
+          <option value="partner">Working together</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="message">Your message</label>
+        <textarea id="message" name="message" maxlength="5000" required></textarea>
+      </div>
+
+      <!-- Ignored by people, filled in by bots. -->
+      <div class="hp" aria-hidden="true">
+        <label for="website">Leave this empty</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div id="result" class="result hidden" role="status" aria-live="polite"></div>
+
+      <button type="submit" class="btn" id="submitBtn">Send message</button>
+    </form>
+  </div>
+
+  <div id="sentView" class="sent hidden">
+    <h2>Thank you — that's with us.</h2>
+    <p>We'll reply to the address you gave, usually within a day or two.</p>
+  </div>
+
+</div>
+
+<footer>
+  <div class="fbrand">Kindred Paws&trade;</div>
+  <div><a href="index.html">Home</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></div>
+</footer>
+
+<script>
+const form = document.getElementById('contactForm');
+const btn = document.getElementById('submitBtn');
+const result = document.getElementById('result');
+
+function fail(msg){
+  result.className = 'result err';
+  result.textContent = msg;
+  result.classList.remove('hidden');
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  result.classList.add('hidden');
+
+  const email = document.getElementById('email').value.trim();
+  const message = document.getElementById('message').value.trim();
+  if(!message){ return fail('Please write a message first.'); }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    return fail('Please enter an email address we can reply to.');
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try{
+    const res = await fetch('/.netlify/functions/send-contact', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: document.getElementById('name').value.trim(),
+        email,
+        topic: document.getElementById('topic').value,
+        message,
+        website: document.getElementById('website').value
+      })
+    });
+    const d = await res.json();
+    if(!res.ok || !d.ok) throw new Error(d.error || 'failed');
+    document.getElementById('formView').classList.add('hidden');
+    document.getElementById('sentView').classList.remove('hidden');
+  }catch(err){
+    fail(err.message && err.message !== 'failed'
+      ? err.message
+      : "That didn't send. Please try again in a moment.");
+    btn.disabled = false;
+    btn.textContent = 'Send message';
+  }
+});
+</script>
+
+</body>
+</html>

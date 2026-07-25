@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A memorial — Kindred Paws</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FAF5EC; --cream-deep:#F1E9DA;
+  --dusk:#1F3A36; --dusk-deep:#142623;
+  --amber:#D98A3D; --amber-deep:#B96F28;
+  --ink:#2B241C; --paper:#F3EEE3;
+  --muted:#8A7F6D; --line:#DCD0B4; --gold:#E3A85C;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;}
+h1,h2,h3{font-family:'Fraunces',serif;margin:0;font-weight:600;}
+p{margin:0;}
+img{max-width:100%;display:block;}
+.wrap{max-width:760px;margin:0 auto;padding:0 24px;}
+
+.state{min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 24px;}
+.state h2{font-size:1.4rem;margin-bottom:.4em;}
+.state p{color:var(--muted);max-width:380px;}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(43,36,28,.12);border-top-color:var(--amber);animation:spin .8s linear infinite;margin:0 auto 18px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.hero{background:radial-gradient(120% 100% at 50% 0%,#24423d 0%,var(--dusk-deep) 70%);color:var(--paper);padding:72px 24px 64px;text-align:center;}
+.hero-photo{width:168px;height:168px;margin:0 auto 26px;border-radius:50%;object-fit:cover;border:1px solid rgba(227,168,92,.4);box-shadow:0 20px 50px -18px rgba(0,0,0,.55);}
+.hero-fallback{width:168px;height:168px;margin:0 auto 26px;border-radius:50%;background:linear-gradient(155deg,#2c4a44,#142623);border:1px solid rgba(227,168,92,.35);display:flex;align-items:center;justify-content:center;}
+.hero-eyebrow{font-size:.76rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.hero h1{font-size:2.9rem;}
+.hero .dates{margin-top:10px;font-family:'Fraunces',serif;font-style:italic;font-size:1.05rem;color:#C9DAD3;}
+
+section{padding:54px 0;}
+hr.divider{border:none;border-top:1px solid var(--line);margin:0;}
+.eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-deep);margin-bottom:8px;}
+.section-head{margin-bottom:24px;}
+.section-head h2{font-size:1.5rem;}
+.story{font-size:1.02rem;color:#3a3126;white-space:pre-wrap;}
+
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.gallery img{aspect-ratio:1;object-fit:cover;border-radius:16px;border:1px solid rgba(0,0,0,.05);}
+
+.candle-panel{background:var(--dusk-deep);border-radius:22px;padding:40px 28px;text-align:center;color:var(--paper);}
+.flame-cluster{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:420px;margin:0 auto;font-size:1.3rem;line-height:1;}
+.flame-cluster span{display:inline-block;animation:flicker 1.6s ease-in-out infinite;}
+.flame-cluster .none{font-size:.85rem;font-family:'Inter',sans-serif;color:#8fa39c;animation:none;}
+.flame-label{font-size:.72rem;letter-spacing:.08em;font-weight:700;color:#9fb3ac;margin-top:12px;}
+.light-btn{padding:11px 22px;border-radius:999px;border:none;background:var(--amber);color:#241505;font-weight:600;font-size:.88rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-top:24px;transition:background .2s ease,transform .15s ease;}
+.light-btn:hover{background:var(--amber-deep);transform:translateY(-1px);}
+.light-btn[disabled]{background:rgba(255,255,255,.09);color:#9fb3ac;cursor:default;transform:none;}
+.flame{display:inline-block;animation:flicker 1.6s ease-in-out infinite;}
+@keyframes flicker{0%,100%{transform:scaleY(1) rotate(0deg);}50%{transform:scaleY(1.12) rotate(-2deg);}}
+
+.gb-note{font-size:.85rem;color:var(--muted);margin-bottom:18px;}
+.gb-form{display:flex;flex-direction:column;gap:10px;margin-bottom:26px;}
+.gb-form input,.gb-form textarea{font-family:'Inter',sans-serif;font-size:.92rem;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);resize:vertical;}
+.gb-form textarea{min-height:84px;}
+.gb-submit{align-self:flex-start;padding:10px 20px;border-radius:999px;border:none;background:var(--dusk);color:var(--paper);font-weight:600;font-size:.88rem;cursor:pointer;}
+.gb-submit:hover{background:var(--dusk-deep);}
+.gb-submit[disabled]{opacity:.5;cursor:default;}
+.pending-note{background:var(--cream-deep);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:.85rem;color:var(--dusk);margin:14px 0 22px;}
+.gb-entry{padding:16px 0;border-bottom:1px solid var(--line);}
+.gb-entry:last-child{border-bottom:none;}
+.gb-entry .who{font-weight:600;font-size:.88rem;color:var(--dusk);}
+.gb-entry .msg{margin-top:4px;font-size:.92rem;color:#3a3126;white-space:pre-wrap;}
+.gb-empty{font-size:.9rem;color:var(--muted);font-style:italic;}
+
+.event{background:rgba(217,138,61,.09);border:1px solid rgba(217,138,61,.3);border-radius:16px;padding:20px;}
+.event h3{font-size:1.05rem;margin-bottom:6px;}
+.event p{font-size:.92rem;color:#4a4033;}
+
+footer{background:var(--dusk-deep);color:#8fa39c;text-align:center;padding:40px 24px;font-size:.8rem;}
+footer .fbrand{color:var(--paper);font-family:'Fraunces',serif;font-size:.98rem;margin-bottom:6px;}
+footer a{color:#a9c4bc;}
+.hidden{display:none !important;}
+@media (max-width:560px){.hero h1{font-size:2.2rem;}.gallery{grid-template-columns:repeat(2,1fr);}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div id="loading" class="state">
+  <div>
+    <div class="spinner"></div>
+    <p>Opening their page…</p>
+  </div>
+</div>
+
+<div id="notfound" class="state hidden">
+  <div>
+    <h2>This page isn't available</h2>
+    <p>The link may be mistyped, or the page may have been made private by the family.</p>
+  </div>
+</div>
+
+<main id="page" class="hidden">
+  <header class="hero">
+    <img id="heroPhoto" class="hero-photo hidden" alt="">
+    <div id="heroFallback" class="hero-fallback">
+      <svg width="70" height="70" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+        <ellipse cx="50" cy="62" rx="24" ry="19" fill="#E3A85C"/>
+        <ellipse cx="20" cy="38" rx="10" ry="13" fill="#E3A85C"/>
+        <ellipse cx="42" cy="24" rx="10" ry="13" fill="#E3A85C"/>
+        <ellipse cx="66" cy="24" rx="10" ry="13" fill="#E3A85C"/>
+        <ellipse cx="86" cy="40" rx="9" ry="12" fill="#E3A85C"/>
+      </svg>
+    </div>
+    <div class="hero-eyebrow">A Kindred Paws memorial</div>
+    <h1 id="petName"></h1>
+    <p class="dates" id="petMeta"></p>
+  </header>
+
+  <section id="storySection" class="hidden">
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow">Their story</div></div>
+      <p class="story" id="storyText"></p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="gallerySection" class="hidden">
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow">Photographs</div><h2>A few of our favourites</h2></div>
+      <div class="gallery" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow">Light a candle</div><h2 id="candleHeading">Thinking of them</h2></div>
+      <div class="candle-panel">
+        <div class="flame-cluster" id="flameCluster"></div>
+        <div class="flame-label" id="flameLabel">CANDLES LIT</div>
+        <button class="light-btn" id="lightBtn"><span class="flame">🕯️</span> Light a candle</button>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" id="gbDivider">
+
+  <section id="guestbookSection">
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow">Guestbook</div><h2>Messages for the family</h2></div>
+      <p class="gb-note" id="gbNote">Messages are reviewed by the family before they appear here.</p>
+      <div class="gb-form" id="gbForm">
+        <input id="gbName" type="text" placeholder="Your name" maxlength="80">
+        <textarea id="gbMsg" placeholder="Share a memory or a kind word…" maxlength="2000"></textarea>
+        <button class="gb-submit" id="gbSubmit">Submit for approval</button>
+      </div>
+      <div id="gbPending" class="pending-note hidden"></div>
+      <div id="gbList"></div>
+    </div>
+  </section>
+
+  <section id="eventSection" class="hidden">
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow">Life celebration</div></div>
+      <div class="event">
+        <h3 id="eventTitle"></h3>
+        <p id="eventDetails"></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="fbrand">Kindred Paws&trade;</div>
+    <div id="privacyNote"></div>
+    <div style="margin-top:12px;"><a href="index.html">Make a page for your own pet</a></div>
+    <div style="margin-top:10px;font-size:.75rem;opacity:.8;"><a href="privacy.html">Privacy</a> &middot; <a href="contact.html">Contact</a></div>
+  </footer>
+</main>
+
+<script>
+const slug = new URLSearchParams(location.search).get('p');
+const CANDLE_KEY = 'kp_candle_' + slug;
+
+const $ = id => document.getElementById(id);
+const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+
+function show(el){ el.classList.remove('hidden'); }
+function hide(el){ el.classList.add('hidden'); }
+
+function renderFlames(count){
+  const cluster = $('flameCluster');
+  cluster.innerHTML = '';
+  cluster.setAttribute('aria-label', count + ' candles lit');
+  if(count === 0){
+    const none = document.createElement('span');
+    none.className = 'none';
+    none.textContent = 'Be the first to light one';
+    cluster.appendChild(none);
+    hide($('flameLabel'));
+    return;
+  }
+  show($('flameLabel'));
+  const MAX = 60;
+  for(let i = 0; i < Math.min(count, MAX); i++){
+    const f = document.createElement('span');
+    f.textContent = '🕯️';
+    f.style.animationDelay = (Math.random() * 1.6).toFixed(2) + 's';
+    cluster.appendChild(f);
+  }
+  if(count > MAX){
+    const more = document.createElement('span');
+    more.className = 'none';
+    more.textContent = '+' + (count - MAX) + ' more';
+    cluster.appendChild(more);
+  }
+}
+
+function renderMessages(list){
+  const el = $('gbList');
+  el.innerHTML = '';
+  if(!list.length){
+    el.innerHTML = '<p class="gb-empty">No messages yet.</p>';
+    return;
+  }
+  list.forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'gb-entry';
+    d.innerHTML = '<div class="who">' + esc(m.name) + '</div><div class="msg">' + esc(m.message) + '</div>';
+    el.appendChild(d);
+  });
+}
+
+function fmtDate(d){
+  if(!d) return '';
+  const dt = new Date(d);
+  return isNaN(dt) ? d : dt.toLocaleDateString('en-IE', { year:'numeric', month:'long', day:'numeric' });
+}
+
+async function load(){
+  if(!slug){ hide($('loading')); show($('notfound')); return; }
+  let data;
+  try{
+    const res = await fetch('/.netlify/functions/get-memorial?p=' + encodeURIComponent(slug));
+    data = await res.json();
+    if(!res.ok || !data.ok) throw new Error('not found');
+  }catch(e){
+    hide($('loading')); show($('notfound')); return;
+  }
+
+  const m = data.memorial;
+  document.title = m.name + ' — Kindred Paws';
+
+  $('petName').textContent = m.name;
+  const meta = [m.species, [m.born && fmtDate(m.born), m.died && fmtDate(m.died)].filter(Boolean).join(' — ')]
+    .filter(Boolean).join(' · ');
+  $('petMeta').textContent = meta;
+  $('candleHeading').textContent = 'Thinking of ' + m.name;
+
+  if(m.photo){
+    $('heroPhoto').src = m.photo;
+    $('heroPhoto').alt = m.name;
+    show($('heroPhoto')); hide($('heroFallback'));
+  }
+
+  if(m.story){ $('storyText').textContent = m.story; show($('storySection')); }
+
+  if(m.memories && m.memories.length){
+    const grid = $('galleryGrid');
+    m.memories.forEach((src, i) => {
+      const img = document.createElement('img');
+      img.src = src; img.alt = m.name + ' — photo ' + (i + 1); img.loading = 'lazy';
+      grid.appendChild(img);
+    });
+    show($('gallerySection'));
+  }
+
+  renderFlames(m.candles || 0);
+  if(localStorage.getItem(CANDLE_KEY)){ markCandleLit(); }
+
+  if(m.guestbookOn === false){
+    hide($('guestbookSection')); hide($('gbDivider'));
+  }else{
+    renderMessages(m.messages || []);
+  }
+
+  if(m.celebration){
+    $('eventTitle').textContent = m.celebration.title || ('A gathering for ' + m.name);
+    const bits = [fmtDate(m.celebration.date), m.celebration.location].filter(Boolean);
+    const extras = [];
+    if(m.celebration.kids) extras.push('Children welcome');
+    if(m.celebration.memory) extras.push('Bring a memory or photo');
+    if(m.celebration.donations) extras.push('Donations instead of flowers');
+    $('eventDetails').textContent = bits.join(' · ') + (extras.length ? ' — ' + extras.join(', ') : '');
+    show($('eventSection'));
+  }
+
+  $('privacyNote').textContent = m.privacy === 'unlisted'
+    ? 'This page is unlisted — only people with the link can see it.'
+    : 'This page is public.';
+
+  hide($('loading'));
+  show($('page'));
+}
+
+function markCandleLit(){
+  const btn = $('lightBtn');
+  btn.textContent = '';
+  const f = document.createElement('span');
+  f.className = 'flame'; f.textContent = '🕯️';
+  btn.appendChild(f);
+  btn.appendChild(document.createTextNode(" You've lit a candle"));
+  btn.disabled = true;
+}
+
+$('lightBtn').addEventListener('click', async () => {
+  if($('lightBtn').disabled) return;
+  markCandleLit();
+  try{ localStorage.setItem(CANDLE_KEY, '1'); }catch(e){}
+  try{
+    const res = await fetch('/.netlify/functions/light-candle', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ slug })
+    });
+    const d = await res.json();
+    if(d.ok) renderFlames(d.candles);
+  }catch(e){ /* the gesture already showed; a failed count isn't worth alarming anyone */ }
+});
+
+$('gbSubmit').addEventListener('click', async () => {
+  const msg = $('gbMsg').value.trim();
+  if(!msg) return;
+  const btn = $('gbSubmit');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try{
+    const res = await fetch('/.netlify/functions/submit-message', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ slug, name: $('gbName').value.trim(), message: msg })
+    });
+    const d = await res.json();
+    if(!res.ok || !d.ok) throw new Error(d.error || 'failed');
+    $('gbName').value = ''; $('gbMsg').value = '';
+    const note = $('gbPending');
+    note.textContent = d.moderated
+      ? "Thank you — your message is with the family, and will appear here once they've read it."
+      : 'Thank you — your message has been added.';
+    show(note);
+    hide($('gbForm'));
+  }catch(e){
+    const note = $('gbPending');
+    note.textContent = "Sorry — that didn't send. Please try again in a moment.";
+    show(note);
+    btn.disabled = false; btn.textContent = 'Submit for approval';
+  }
+});
+
+load();
+</script>
+</body>
+</html>

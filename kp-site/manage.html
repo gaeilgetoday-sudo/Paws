@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manage their page — Kindred Paws</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FAF5EC; --cream-deep:#F1E9DA; --dusk:#1F3A36; --dusk-deep:#142623;
+  --amber:#D98A3D; --amber-deep:#B96F28; --ink:#2B241C; --paper:#F3EEE3;
+  --muted:#8A7F6D; --line:#DCD0B4; --gold:#E3A85C;
+  --ok:#3E5C46; --warn:#B54A3B;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--cream-deep);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;}
+h1,h2,h3{font-family:'Fraunces',serif;margin:0;font-weight:600;}
+p{margin:0;}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:6px;}
+.shell{max-width:720px;margin:0 auto;background:var(--cream);min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 26px;border-bottom:1px solid var(--line);}
+.brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-size:1.02rem;text-decoration:none;color:inherit;}
+.brand svg{width:22px;height:22px;}
+.body{padding:28px 26px 60px;}
+
+.state{padding:60px 26px;text-align:center;}
+.spinner{width:30px;height:30px;border-radius:50%;border:3px solid rgba(43,36,28,.12);border-top-color:var(--amber);animation:spin .8s linear infinite;margin:0 auto 18px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* sign in */
+.signin{max-width:400px;margin:0 auto;text-align:center;}
+.signin h1{font-size:1.55rem;margin-bottom:.4em;}
+.signin p{color:var(--muted);font-size:.95rem;margin-bottom:1.6em;}
+.signin input{width:100%;font-family:inherit;font-size:1rem;padding:.85em 1em;border-radius:12px;border:1.5px solid var(--line);background:#fff;margin-bottom:12px;}
+.signin input:focus{border-color:var(--amber);}
+.btn{font-family:inherit;font-weight:600;font-size:.95rem;padding:.85em 1.7em;border-radius:999px;border:none;cursor:pointer;background:var(--amber);color:#241505;}
+.btn:hover{background:var(--amber-deep);}
+.btn[disabled]{opacity:.55;cursor:default;}
+.btn-quiet{background:none;border:1.5px solid var(--line);color:var(--ink);}
+.btn-quiet:hover{background:rgba(43,36,28,.05);border-color:var(--ink);}
+.note{font-size:.88rem;margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--cream-deep);border:1px solid var(--line);}
+.note.err{border-color:var(--warn);color:var(--warn);}
+
+/* page summary */
+.summary{background:var(--dusk-deep);color:var(--paper);border-radius:18px;padding:24px;margin-bottom:26px;}
+.summary .eyebrow{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);font-weight:700;}
+.summary h2{color:var(--paper);font-size:1.5rem;margin:.2em 0 .5em;}
+.summary .status{font-size:.85rem;color:#a9c4bc;}
+.summary-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
+.summary-actions a{font-size:.85rem;font-weight:600;text-decoration:none;padding:.6em 1.2em;border-radius:999px;background:rgba(243,238,227,.12);color:var(--paper);border:1px solid rgba(243,238,227,.22);}
+.summary-actions a:hover{background:rgba(243,238,227,.2);}
+.summary-actions a.primary{background:var(--amber);color:#241505;border-color:var(--amber);}
+
+/* queue */
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px;}
+.section-head h3{font-size:1.15rem;}
+.count-pill{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:.3em .8em;border-radius:999px;background:var(--amber);color:#241505;}
+.count-pill.zero{background:var(--cream-deep);color:var(--muted);}
+.hint{font-size:.86rem;color:var(--muted);margin-bottom:18px;}
+
+.msg{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;background:#fff;}
+.msg.pending{border-left:3px solid var(--amber);}
+.msg.approved{border-left:3px solid var(--ok);}
+.msg.hidden-state{border-left:3px solid var(--muted);opacity:.7;}
+.msg-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px;}
+.msg-who{font-weight:600;font-size:.92rem;}
+.msg-when{font-size:.75rem;color:var(--muted);white-space:nowrap;}
+.msg-text{font-size:.93rem;color:#3a3126;white-space:pre-wrap;word-break:break-word;}
+.msg-state{font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-top:10px;color:var(--muted);}
+.msg-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.act{font-family:inherit;font-size:.82rem;font-weight:600;padding:.5em 1.1em;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);}
+.act:hover{border-color:var(--ink);}
+.act.approve{background:var(--ok);border-color:var(--ok);color:#fff;}
+.act.approve:hover{filter:brightness(1.1);}
+.act.danger{color:var(--warn);border-color:rgba(181,74,59,.4);}
+.act.danger:hover{background:rgba(181,74,59,.08);border-color:var(--warn);}
+.act[disabled]{opacity:.5;cursor:default;}
+.empty{font-size:.92rem;color:var(--muted);font-style:italic;padding:20px 0;}
+.confirm{background:#FFF3E0;border:1px solid var(--amber);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:.86rem;}
+.confirm p{margin-bottom:10px;}
+.hidden{display:none !important;}
+.danger-zone{margin-top:44px;padding-top:26px;border-top:1px solid var(--line);}
+.danger-zone h3{font-size:1.05rem;margin-bottom:6px;}
+.danger-zone p{font-size:.88rem;color:var(--muted);margin-bottom:14px;}
+.del-panel{border:1px solid rgba(181,74,59,.35);border-radius:14px;padding:18px 20px;background:rgba(181,74,59,.04);}
+.del-panel p{color:#4a4033;font-size:.9rem;margin-bottom:12px;}
+.del-panel input{width:100%;font-family:inherit;font-size:.95rem;padding:.7em .9em;border-radius:10px;border:1.5px solid var(--line);background:#fff;margin:10px 0;}
+.del-row{display:flex;flex-wrap:wrap;gap:8px;}
+.deleted-banner{background:#FFF3E0;border:1.5px solid var(--amber);border-radius:14px;padding:18px 20px;margin-bottom:24px;}
+.deleted-banner h3{font-size:1.05rem;color:var(--amber-deep);margin-bottom:6px;}
+.deleted-banner p{font-size:.9rem;color:#4a4033;margin-bottom:14px;}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+        <ellipse cx="50" cy="62" rx="24" ry="19" fill="#D98A3D"/>
+        <ellipse cx="20" cy="38" rx="10" ry="13" fill="#D98A3D"/>
+        <ellipse cx="42" cy="24" rx="10" ry="13" fill="#D98A3D"/>
+        <ellipse cx="66" cy="24" rx="10" ry="13" fill="#D98A3D"/>
+        <ellipse cx="86" cy="40" rx="9" ry="12" fill="#D98A3D"/>
+      </svg>
+      Kindred Paws
+    </a>
+    <button class="act hidden" id="signOut">Sign out</button>
+  </div>
+
+  <div id="loading" class="state"><div class="spinner"></div><p>One moment…</p></div>
+
+  <!-- sign in -->
+  <div id="signinView" class="body hidden">
+    <div class="signin">
+      <h1>Find your page</h1>
+      <p>Enter the email address you used when you created it, and we'll send you a link straight back to it.</p>
+      <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+      <button class="btn" id="sendLink">Email me a link</button>
+      <div id="signinNote" class="note hidden"></div>
+    </div>
+  </div>
+
+  <!-- manage -->
+  <div id="manageView" class="body hidden">
+    <div id="deletedBanner" class="deleted-banner hidden">
+      <h3>This page is deleted</h3>
+      <p id="deletedMsg"></p>
+      <button class="btn" id="undoBtn">Restore it</button>
+    </div>
+
+    <div class="summary">
+      <div class="eyebrow">Your memorial page</div>
+      <h2 id="petName">—</h2>
+      <div class="status" id="pageStatus"></div>
+      <div class="summary-actions">
+        <a id="viewLink" href="#" class="primary">View the page</a>
+        <a id="editLink" href="builder.html">Edit it</a>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h3>Guestbook</h3>
+      <span class="count-pill zero" id="pendingPill">0 waiting</span>
+    </div>
+    <p class="hint" id="modeHint"></p>
+    <div id="msgList"></div>
+
+    <div class="danger-zone" id="dangerZone">
+      <h3>Delete this page</h3>
+      <p>The page stops being visible straight away. Nothing is permanently removed for 30 days, so you can change your mind.</p>
+      <button class="act danger" id="startDelete">Delete this page</button>
+
+      <div class="del-panel hidden" id="delPanel">
+        <p><strong>The link stops working immediately.</strong> Everything &mdash; photos, story, messages, candles &mdash; is kept for 30 days in case you want it back. After that it's gone for good and can't be recovered.</p>
+        <div class="del-row">
+          <button class="act danger" id="confirmDelete">Yes, delete it</button>
+          <button class="act" id="cancelDelete">Keep the page</button>
+        </div>
+        <p style="margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:.86rem;">
+          If you'd rather it were gone right now, with no waiting period, type
+          <strong id="nameEcho"></strong> below.
+        </p>
+        <input type="text" id="purgeName" placeholder="Type their name" autocomplete="off">
+        <button class="act danger" id="purgeBtn">Delete permanently, now</button>
+        <div id="delError" class="note err hidden" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+const show = el => el.classList.remove('hidden');
+const hide = el => el.classList.add('hidden');
+const STORE_KEY = 'kp_memorial_access';
+
+let reference = null;
+
+function getStored(){
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch(e){ return null; }
+}
+function setStored(v){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch(e){}
+}
+
+function when(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  const days = Math.floor((Date.now() - d) / 86400000);
+  if(days === 0) return 'Today';
+  if(days === 1) return 'Yesterday';
+  if(days < 7) return days + ' days ago';
+  return d.toLocaleDateString('en-IE', { day:'numeric', month:'short', year:'numeric' });
+}
+
+// ---------------------------------------------------------------- sign in
+$('sendLink').addEventListener('click', async () => {
+  const email = $('emailInput').value.trim();
+  const note = $('signinNote');
+  if(!email){ return; }
+  const btn = $('sendLink');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try{
+    const res = await fetch('/.netlify/functions/request-link', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+    const d = await res.json();
+    note.className = 'note' + (res.ok ? '' : ' err');
+    note.textContent = d.message || d.error || 'Something went wrong.';
+    show(note);
+  }catch(e){
+    note.className = 'note err';
+    note.textContent = "We couldn't send that just now — please try again in a moment.";
+    show(note);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Email me a link';
+  }
+});
+
+$('signOut').addEventListener('click', () => {
+  try { localStorage.removeItem(STORE_KEY); } catch(e){}
+  location.href = 'manage.html';
+});
+
+// ---------------------------------------------------------------- moderation
+async function loadQueue(){
+  const res = await fetch('/.netlify/functions/moderate-messages?reference=' + encodeURIComponent(reference));
+  if(!res.ok) throw new Error('queue unavailable');
+  return await res.json();
+}
+
+function renderQueue(data){
+  const list = $('msgList');
+  list.innerHTML = '';
+
+  const pending = data.messages.filter(m => m.status === 'pending').length;
+  const pill = $('pendingPill');
+  pill.textContent = pending === 1 ? '1 waiting' : pending + ' waiting';
+  pill.classList.toggle('zero', pending === 0);
+
+  $('modeHint').textContent = data.moderationOn
+    ? 'Nothing appears on the page until you approve it.'
+    : 'Review is switched off — messages appear as soon as they are left. You can turn review back on in the builder.';
+
+  if(!data.messages.length){
+    list.innerHTML = '<p class="empty">No messages yet.</p>';
+    return;
+  }
+
+  // Pending first — that's what needs a decision.
+  const order = { pending:0, approved:1, hidden:2 };
+  data.messages.sort((a,b) => (order[a.status] - order[b.status]) || (a.at < b.at ? 1 : -1));
+
+  data.messages.forEach(m => {
+    const el = document.createElement('div');
+    el.className = 'msg ' + (m.status === 'hidden' ? 'hidden-state' : m.status);
+    el.innerHTML =
+      '<div class="msg-top"><span class="msg-who">' + esc(m.name) + '</span>' +
+      '<span class="msg-when">' + when(m.at) + '</span></div>' +
+      '<div class="msg-text">' + esc(m.message) + '</div>' +
+      '<div class="msg-state">' +
+        (m.status === 'pending' ? 'Waiting for you' :
+         m.status === 'approved' ? 'Showing on the page' : 'Hidden') +
+      '</div>' +
+      '<div class="msg-actions"></div>';
+
+    const actions = el.querySelector('.msg-actions');
+    if(m.status !== 'approved'){
+      actions.appendChild(button('Approve', 'act approve', () => act(m.id, 'approve')));
+    }
+    if(m.status !== 'hidden'){
+      actions.appendChild(button('Hide', 'act', () => act(m.id, 'hide')));
+    }
+    actions.appendChild(button('Delete', 'act danger', () => confirmDelete(el, m)));
+    list.appendChild(el);
+  });
+}
+
+function button(label, cls, onClick){
+  const b = document.createElement('button');
+  b.className = cls; b.textContent = label; b.type = 'button';
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function confirmDelete(el, m){
+  if(el.querySelector('.confirm')) return;
+  const box = document.createElement('div');
+  box.className = 'confirm';
+  box.innerHTML = '<p>Delete this message permanently? Hiding it keeps it out of sight but lets you change your mind later.</p>';
+  const row = document.createElement('div');
+  row.className = 'msg-actions';
+  row.appendChild(button('Yes, delete it', 'act danger', () => act(m.id, 'delete')));
+  row.appendChild(button('Cancel', 'act', () => box.remove()));
+  box.appendChild(row);
+  el.appendChild(box);
+}
+
+async function act(messageId, action){
+  try{
+    const res = await fetch('/.netlify/functions/moderate-messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ reference, messageId, action })
+    });
+    if(!res.ok) throw new Error('failed');
+    renderQueue(await loadQueue());
+  }catch(e){
+    alert("That didn't save — please try again in a moment.");
+  }
+}
+
+// ---------------------------------------------------------------- boot
+async function boot(){
+  const token = new URLSearchParams(location.search).get('token');
+
+  if(token){
+    try{
+      const res = await fetch('/.netlify/functions/redeem-link?token=' + encodeURIComponent(token));
+      const d = await res.json();
+      if(res.ok && d.ok){
+        reference = d.reference;
+        setStored({ reference: d.reference, email: d.email });
+        history.replaceState({}, '', location.pathname);
+      }else{
+        hide($('loading')); show($('signinView'));
+        const note = $('signinNote');
+        note.className = 'note err';
+        note.textContent = 'That link has expired or been used already. Enter your email and we\u2019ll send a fresh one.';
+        show(note);
+        return;
+      }
+    }catch(e){
+      hide($('loading')); show($('signinView')); return;
+    }
+  }
+
+  if(!reference){
+    const stored = getStored();
+    if(stored?.reference) reference = stored.reference;
+  }
+
+  if(!reference){
+    hide($('loading')); show($('signinView')); return;
+  }
+
+  try{
+    const meRes = await fetch('/.netlify/functions/load-memorial?reference=' + encodeURIComponent(reference));
+    const me = await meRes.json();
+    if(!meRes.ok || !me.ok || !me.memorial) throw new Error('no page');
+    const m = me.memorial;
+
+    currentName = m.name || '';
+    $('petName').textContent = m.name || 'Their page';
+    $('pageStatus').textContent = m.published
+      ? (m.privacy === 'unlisted' ? 'Published · unlisted, only people with the link can see it'
+        : m.privacy === 'public' ? 'Published · public' : 'Published · private')
+      : 'Not published yet — only you can see it';
+
+    const view = $('viewLink');
+    if(m.published && m.slug){
+      view.href = 'remember.html?p=' + m.slug;
+    }else{
+      view.classList.add('hidden');
+    }
+
+    if(m.deletedAt && m.purgeAfter) showDeleted(m);
+
+    renderQueue(await loadQueue());
+    hide($('loading')); show($('manageView')); show($('signOut'));
+  }catch(e){
+    hide($('loading')); show($('signinView'));
+  }
+}
+
+// ---------------------------------------------------------------- deletion
+let currentName = '';
+
+function daysLeft(purgeAfter){
+  return Math.max(0, Math.ceil((purgeAfter - Date.now()) / 86400000));
+}
+
+function showDeleted(m){
+  const left = daysLeft(m.purgeAfter);
+  $('deletedMsg').textContent =
+    'Nobody can see it, and the link no longer works. Everything is still here for ' +
+    (left === 1 ? '1 more day' : left + ' more days') +
+    ' if you want it back. After that it is permanently removed.';
+  show($('deletedBanner'));
+  hide($('dangerZone'));
+  const view = $('viewLink');
+  if(view) view.classList.add('hidden');
+}
+
+$('startDelete').addEventListener('click', () => {
+  $('nameEcho').textContent = currentName || 'their name';
+  show($('delPanel'));
+  $('startDelete').disabled = true;
+});
+
+$('cancelDelete').addEventListener('click', () => {
+  hide($('delPanel'));
+  $('startDelete').disabled = false;
+  hide($('delError'));
+});
+
+$('confirmDelete').addEventListener('click', async () => {
+  const btn = $('confirmDelete');
+  btn.disabled = true; btn.textContent = 'Deleting\u2026';
+  try{
+    const res = await fetch('/.netlify/functions/delete-memorial', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ reference, action:'delete' })
+    });
+    const d = await res.json();
+    if(!res.ok || !d.ok) throw new Error(d.error || 'failed');
+    hide($('delPanel'));
+    showDeleted({ purgeAfter: d.purgeAfter });
+    $('pageStatus').textContent = 'Deleted \u2014 not visible to anyone';
+  }catch(e){
+    $('delError').textContent = "That didn't work \u2014 please try again in a moment.";
+    show($('delError'));
+    btn.disabled = false; btn.textContent = 'Yes, delete it';
+  }
+});
+
+$('purgeBtn').addEventListener('click', async () => {
+  const typed = $('purgeName').value.trim();
+  if(!typed){
+    $('delError').textContent = 'Type their name to confirm you mean this.';
+    show($('delError')); return;
+  }
+  const btn = $('purgeBtn');
+  btn.disabled = true; btn.textContent = 'Removing\u2026';
+  try{
+    const res = await fetch('/.netlify/functions/delete-memorial', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ reference, action:'purge', confirmName: typed })
+    });
+    const d = await res.json();
+    if(!res.ok || !d.ok) throw new Error(d.error || 'failed');
+    try { localStorage.removeItem(STORE_KEY); } catch(e){}
+    document.querySelector('.shell').innerHTML =
+      '<div class="state"><h2 style="font-family:Fraunces,serif;font-size:1.4rem;margin-bottom:.5em;">The page has been removed.</h2>' +
+      '<p style="color:var(--muted);">Everything has been permanently deleted. ' +
+      'Your purchase is still valid, so you can <a href="builder.html">make a new page</a> whenever you\u2019re ready.</p></div>';
+  }catch(e){
+    $('delError').textContent = e.message === "That name doesn't match."
+      ? "That name doesn\u2019t match. Check the spelling and try again."
+      : "That didn\u2019t work \u2014 please try again in a moment.";
+    show($('delError'));
+    btn.disabled = false; btn.textContent = 'Delete permanently, now';
+  }
+});
+
+$('undoBtn').addEventListener('click', async () => {
+  const btn = $('undoBtn');
+  btn.disabled = true; btn.textContent = 'Restoring\u2026';
+  try{
+    await fetch('/.netlify/functions/delete-memorial', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ reference, action:'undo' })
+    });
+    location.reload();
+  }catch(e){
+    btn.disabled = false; btn.textContent = 'Restore it';
+  }
+});
+
+boot();
+</script>
+</body>
+</html>
