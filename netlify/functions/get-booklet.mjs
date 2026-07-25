@@ -22,6 +22,7 @@ const TEMPLATE_PATH = path.join(__dirname, "assets", "booklet-template.pdf");
 
 const AMBER = rgb(0xd9 / 255, 0x8a / 255, 0x3d / 255);
 const PAPER_MUTED = rgb(0xa9 / 255, 0xc4 / 255, 0xbc / 255);
+const FOOTER_MUTED = rgb(0x8a / 255, 0x7f / 255, 0x6d / 255); // matches the printed footer text colour
 
 function sanitize(str, fallback) {
   if (!str) return fallback;
@@ -29,9 +30,10 @@ function sanitize(str, fallback) {
   return cleaned || fallback;
 }
 
-async function stampCover(templateBytes, petName, ownerName) {
+async function stampBooklet(templateBytes, petName, ownerName, orderDate, orderRef) {
   const pdfDoc = await PDFDocument.load(templateBytes);
-  const cover = pdfDoc.getPages()[0];
+  const pages = pdfDoc.getPages();
+  const cover = pages[0];
   const { width } = cover.getSize();
 
   const italic = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
@@ -43,7 +45,7 @@ async function stampCover(templateBytes, petName, ownerName) {
   // off the page.
   const MAX_LINE_WIDTH = 500; // keeps a comfortable margin either side
 
-  const line1 = `A wishes booklet for ${petName}`;
+  const line1 = `For ${petName}`;
   let size1 = 17;
   while (italic.widthOfTextAtSize(line1, size1) > MAX_LINE_WIDTH && size1 > 9) {
     size1 -= 0.5;
@@ -71,9 +73,62 @@ async function stampCover(templateBytes, petName, ownerName) {
     color: PAPER_MUTED,
   });
 
-  pdfDoc.setTitle(`${petName}'s Wishes Booklet \u2014 Kindred Paws`);
+  // Order date — a soft ownership marker (turns the cover into "a specific
+  // transaction record" rather than a generic template anyone could have)
+  // and a helpful anchor for the person's own records.
+  const line3 = `Ordered ${orderDate}`;
+  const size3 = 8.5;
+  const w3 = helv.widthOfTextAtSize(line3, size3);
+  cover.drawText(line3, {
+    x: (width - w3) / 2,
+    y: 316,
+    size: size3,
+    font: helv,
+    color: PAPER_MUTED,
+  });
+
+  pdfDoc.setTitle(`${petName}'s copy of Just In Case, With Love \u2014 Kindred Paws`);
   pdfDoc.setAuthor("Kindred Paws");
-  pdfDoc.setSubject(`Personalized wishes booklet prepared for ${petName}`);
+  pdfDoc.setSubject(`Personalized keepsake prepared for ${petName}`);
+  // Hidden fingerprint — invisible in any normal viewer, only visible via
+  // File > Properties. Not a copy-prevention measure, just traceability: if
+  // a copy ever surfaces somewhere public, this ties it back to the order
+  // it came from without affecting the reading experience at all.
+  pdfDoc.setKeywords([`order-ref:${orderRef}`, `ordered:${orderDate}`]);
+
+  // Stamp the pet's name into the footer of every interior page too (not
+  // just the cover) — a light deterrent against photocopying or sharing a
+  // page in isolation, since every page quietly says whose copy it is.
+  // Skips page 1 (cover, already personalized above) and the last page
+  // (dark closing page), matching exactly where the printed footer already
+  // appears in the template.
+  const footerText = `Personalized for ${petName}`;
+  const FOOTER_MAX_WIDTH = 260; // fits comfortably in the gap between the
+                                  // brand mark and the page number
+  let footerSize = 8;
+  while (
+    helv.widthOfTextAtSize(footerText, footerSize) > FOOTER_MAX_WIDTH &&
+    footerSize > 6
+  ) {
+    footerSize -= 0.5;
+  }
+  const footerWidth = helv.widthOfTextAtSize(footerText, footerSize);
+
+  // Only the 29 numbered content pages carry a footer at all now (front
+  // matter — cover, Contents — and the closing page are unnumbered), so
+  // the personalization stamp only belongs on those same pages: physical
+  // pages 3..31, i.e. indices 2..30.
+  for (let i = 2; i < pages.length - 1; i++) {
+    const page = pages[i];
+    page.drawText(footerText, {
+      x: (width - footerWidth) / 2,
+      y: 31.2, // matches the printed footer baseline (BM - 13mm from the
+                // Python template)
+      size: footerSize,
+      font: helv,
+      color: FOOTER_MUTED,
+    });
+  }
 
   return pdfDoc.save();
 }
@@ -101,6 +156,10 @@ export default async (req) => {
   );
   const petName = sanitize(fields.pet_name, "your pet");
   const ownerName = sanitize(fields.owner_name, "you");
+  const orderDate = new Date(session.created * 1000).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   let templateBytes;
   try {
@@ -112,7 +171,7 @@ export default async (req) => {
     });
   }
 
-  const pdfBytes = await stampCover(templateBytes, petName, ownerName);
+  const pdfBytes = await stampBooklet(templateBytes, petName, ownerName, orderDate, session.id);
   const filenameSafe =
     petName.replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-+|-+$/g, "") ||
     "pet";
@@ -121,7 +180,7 @@ export default async (req) => {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="kindred-paws-wishes-booklet-${filenameSafe}.pdf"`,
+      "Content-Disposition": `attachment; filename="just-in-case-with-love-${filenameSafe}.pdf"`,
       "Cache-Control": "no-store",
     },
   });

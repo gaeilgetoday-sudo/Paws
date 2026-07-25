@@ -1,14 +1,19 @@
 // netlify/functions/create-checkout.mjs
 //
-// Creates a Stripe Checkout Session for the wishes booklet. Stripe's own
-// hosted page collects payment plus two custom fields (pet's name, owner's
-// name) so we never have to handle card details ourselves.
+// Creates a Stripe Checkout Session for "Just In Case, With Love". Stripe's
+// own hosted page collects payment plus two custom fields (pet's name,
+// owner's name) so we never have to handle card details ourselves.
+//
+// This references a Price you create in the Stripe dashboard (rather than
+// building one inline) specifically so the product image you upload there
+// actually shows up on the checkout page. See STRIPE-SETUP.md for the
+// dashboard steps.
 //
 // Required environment variables (set in Netlify: Site settings > Environment
 // variables):
 //   STRIPE_SECRET_KEY   e.g. sk_live_... (use sk_test_... while testing)
-//   STRIPE_PRICE_ID     the Price ID of the booklet product in your Stripe
-//                        dashboard, e.g. price_1AbCdEfGhIjKlM
+//   STRIPE_PRICE_ID      the Price ID from your "Just In Case, With Love"
+//                         product in Stripe, e.g. price_1AbCdEfGhIjKlM
 //
 import Stripe from "stripe";
 
