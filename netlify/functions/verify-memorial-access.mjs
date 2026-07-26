@@ -50,6 +50,13 @@ export default async (req) => {
     return json({ paid: false, reason: "unpaid" }, 402);
   }
 
+  // A paid session alone isn't enough — it must be a paid session for the
+  // memorial product specifically. Without this check, a booklet purchase's
+  // session_id would also unlock the memorial builder for free.
+  if (session.metadata?.product !== "memorial") {
+    return json({ paid: false, reason: "wrong_product" }, 402);
+  }
+
   return json({
     paid: true,
     email: session.customer_details?.email || null,

@@ -6,3 +6,16 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
   included_files = ["netlify/functions/assets/**"]
+
+# Baseline security headers. Deliberately not including a Content-Security-Policy
+# here yet — this site relies on inline <script> tags throughout, and a CSP
+# strict enough to matter would need nonces/hashes added to every one of them
+# plus live testing against Stripe, Google Fonts, and Resend before it's safe
+# to ship. Worth doing as a follow-up, not blindly added here untested.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(self)"

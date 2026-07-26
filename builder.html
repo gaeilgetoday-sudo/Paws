@@ -350,7 +350,7 @@
       </label>
       <label class="privacy-card" data-val="private">
         <input type="radio" name="privacy" value="private">
-        <div><h3>Private</h3><p>Just for you. No visitors unless you invite them.</p></div>
+        <div><h3>Private</h3><p>Just for you. Nobody else — including with the link — can view this page.</p></div>
       </label>
     </section>
 
@@ -461,6 +461,7 @@
 
 </div>
 
+<script src="vendor/qrcode.min.js"></script>
 <script>
 // ---------------------------------------------------------------------------
 // ACCESS GATE
@@ -573,11 +574,36 @@
 
   const state = {
     name:'', species:'', born:'', died:'', lovedBy:'',
-    photo:null, story:'', memories:[],
+    // .photo is the uploaded photo's id (what actually gets saved); .photoPreview
+    // is whatever's currently displayable — a local data URL while a fresh
+    // upload is in flight, or the served URL once we have an id.
+    photo:null, photoPreview:null, story:'',
+    // Each memory is { id, preview } for the same reason.
+    memories:[],
     privacy:'unlisted', condOn:true, modOn:true, closeAfter:'never',
     celebEnabled:false, celebTitle:'', celebDate:'', celebLoc:'', celebKids:false, celebMemory:true, celebDonations:false,
     published:false
   };
+
+  // Photos are uploaded separately from the rest of the save (see
+  // upload-photo.mjs) so a story edit doesn't re-send every photo just to
+  // save one sentence. saveNow() awaits these before reading state.photo /
+  // state.memories, so a save can never race ahead of an in-flight upload.
+  const pendingUploads = [];
+
+  function photoUrl(id){
+    return id ? ('/.netlify/functions/get-photo?id=' + encodeURIComponent(id)) : null;
+  }
+
+  async function uploadPhoto(dataUrl){
+    const res = await fetch('/.netlify/functions/upload-photo', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ reference: (window.KP_ACCESS && window.KP_ACCESS.reference) || null, dataUrl })
+    });
+    const d = await res.json();
+    if(!res.ok || !d.ok) throw new Error(d.error || 'upload failed');
+    return d.id;
+  }
 
   // ---------- crumbs ----------
   const crumbsEl = document.getElementById('crumbs');
@@ -649,9 +675,18 @@
     const f = e.target.files[0]; if(!f) return;
     heroPreview.textContent = '…';
     try{
-      state.photo = await resizeImage(f, 900, 0.85);
-      heroPreview.style.backgroundImage = 'url(' + state.photo + ')';
+      const dataUrl = await resizeImage(f, 900, 0.85);
+      state.photoPreview = dataUrl;
+      heroPreview.style.backgroundImage = 'url(' + dataUrl + ')';
       heroPreview.textContent = '';
+      state.photo = null; // not saved until the upload below resolves
+      const uploadPromise = uploadPhoto(dataUrl).then(id => {
+        state.photo = id;
+        state.photoPreview = photoUrl(id); // now cacheable, not a huge inline data URL
+      }).catch(()=>{
+        setSaveStatus("Couldn't upload that photo — try again", 'warn');
+      });
+      pendingUploads.push(uploadPromise);
       queueSave();
     }catch(err){ heroPreview.textContent = '🐾'; }
   });
@@ -680,18 +715,32 @@
     const files = [...e.target.files].slice(0, 8 - state.memories.length);
     for(const f of files){
       try{
-        state.memories.push(await resizeImage(f, 1200, 0.82));
+        const dataUrl = await resizeImage(f, 1200, 0.82);
+        const entry = { id:null, preview:dataUrl };
+        state.memories.push(entry);
         renderThumbs();
+        const uploadPromise = uploadPhoto(dataUrl).then(id => {
+          entry.id = id;
+          entry.preview = photoUrl(id);
+          renderThumbs();
+        }).catch(()=>{
+          // Drop it rather than leave a memory that can never actually save.
+          const idx = state.memories.indexOf(entry);
+          if(idx > -1) state.memories.splice(idx, 1);
+          renderThumbs();
+          setSaveStatus("Couldn't upload one of those photos — try again", 'warn');
+        });
+        pendingUploads.push(uploadPromise);
       }catch(err){ /* skip anything the browser can't decode */ }
     }
     queueSave();
   });
   function renderThumbs(){
     thumbsEl.innerHTML = '';
-    state.memories.forEach((src,i)=>{
+    state.memories.forEach((m,i)=>{
       const d = document.createElement('div');
       d.className = 'thumb';
-      d.style.backgroundImage = 'url(' + src + ')';
+      d.style.backgroundImage = 'url(' + m.preview + ')';
       const btn = document.createElement('button');
       btn.type = 'button'; btn.textContent = '×'; btn.setAttribute('aria-label','Remove photo');
       btn.addEventListener('click', ()=>{ state.memories.splice(i,1); renderThumbs(); queueSave(); });
@@ -747,14 +796,14 @@
 
     let html = '';
     html += '<button class="edit-pill" data-jump="2">Edit</button>';
-    html += '<div class="preview-photo" style="' + (state.photo ? 'background-image:url('+state.photo+')' : '') + '"></div>';
+    html += '<div class="preview-photo" style="' + (state.photoPreview ? 'background-image:url('+state.photoPreview+')' : '') + '"></div>';
     html += '<h2>' + name + '</h2>';
     if(meta) html += '<div class="preview-meta">' + meta + '</div>';
     html += '<span class="privacy-badge">' + privacyLabel + '</span>';
     if(state.story) html += '<div class="preview-story">' + escapeHtml(state.story) + '</div>';
     if(state.memories.length){
       html += '<div class="preview-section-label">Gallery</div>';
-      html += '<div class="preview-gallery">' + state.memories.map(m=>'<div style="background-image:url('+m+')"></div>').join('') + '</div>';
+      html += '<div class="preview-gallery">' + state.memories.map(m=>'<div style="background-image:url('+m.preview+')"></div>').join('') + '</div>';
     }
     // Candles appear on every published page — no setup, nothing to configure.
     html += '<div class="preview-section-label">Candles</div>';
@@ -820,7 +869,7 @@
       email: (window.KP_ACCESS && window.KP_ACCESS.email) || null,
       name: state.name, species: state.species, born: state.born, died: state.died,
       lovedBy: state.lovedBy, photo: state.photo, story: state.story,
-      memories: state.memories, privacy: state.privacy,
+      memories: state.memories.map(m => m.id).filter(Boolean), privacy: state.privacy,
       guestbookOn: state.condOn, moderationOn: state.modOn, closeAfter: state.closeAfter,
       celebEnabled: state.celebEnabled, celebTitle: state.celebTitle,
       celebDate: state.celebDate, celebLoc: state.celebLoc,
@@ -834,6 +883,12 @@
     saving = true;
     setSaveStatus('Saving…');
     try{
+      // Don't save ahead of a photo that's still mid-upload — otherwise a
+      // fast typist could save a record referencing a photo id that
+      // doesn't exist yet.
+      if(pendingUploads.length){
+        await Promise.allSettled(pendingUploads.splice(0, pendingUploads.length));
+      }
       const res = await fetch('/.netlify/functions/save-memorial', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify(payload())
@@ -866,7 +921,9 @@
       const m = d.memorial;
       Object.assign(state, {
         id:m.id, name:m.name||'', species:m.species||'', born:m.born||'', died:m.died||'',
-        lovedBy:m.lovedBy||'', photo:m.photo||null, story:m.story||'', memories:m.memories||[],
+        lovedBy:m.lovedBy||'', photo:m.photo||null, photoPreview:photoUrl(m.photo||null),
+        story:m.story||'',
+        memories:(m.memories||[]).map(id => ({ id, preview: photoUrl(id) })),
         privacy:m.privacy||'unlisted', condOn:m.guestbookOn !== false, modOn:m.moderationOn !== false,
         closeAfter:m.closeAfter||'never', celebEnabled:!!m.celebEnabled, celebTitle:m.celebTitle||'',
         celebDate:m.celebDate||'', celebLoc:m.celebLoc||'', celebKids:!!m.celebKids,
@@ -889,11 +946,12 @@
     document.getElementById('condOn').checked = state.condOn;
     document.getElementById('modOn').checked = state.modOn;
     document.getElementById('closeAfter').value = state.closeAfter;
-    if(state.photo){
+    if(state.photoPreview){
       const p = document.getElementById('heroPreview');
-      p.style.backgroundImage = 'url(' + state.photo + ')';
+      p.style.backgroundImage = 'url(' + state.photoPreview + ')';
       p.textContent = '';
     }
+    if(state.memories.length) renderThumbs();
     document.querySelectorAll('.privacy-card').forEach(c=>{
       const on = c.dataset.val === state.privacy;
       c.classList.toggle('selected', on);
@@ -916,7 +974,7 @@
     document.getElementById('postPublish').hidden = false;
     const link = location.origin + '/remember.html?p=' + slug;
     document.getElementById('pageLink').value = link;
-    drawFakeQR(document.getElementById('qrCanvas'), link);
+    drawQR(document.getElementById('qrCanvas'), link);
     const name = state.name.trim() || 'them';
     document.getElementById('shareText1').textContent = 'We made a page to remember ' + name + ' — ' + link;
     document.getElementById('shareText2').textContent = 'Hi — I wanted to share a page we made to remember ' + name + '. You can see it here: ' + link;
@@ -973,26 +1031,18 @@
     document.body.removeChild(ta); done();
   }
 
-  // deterministic fake QR pattern — visual only, not a real scannable code
-  function drawFakeQR(canvas, text){
-    const ctx = canvas.getContext('2d');
-    const size = 21, cell = canvas.width / size;
-    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#152825';
-    let hash = 0;
-    for(let i=0;i<text.length;i++){ hash = (hash * 31 + text.charCodeAt(i)) >>> 0; }
-    function rand(x,y){ hash = (hash ^ (x*97+y*57)) >>> 0; hash = (hash * 1103515245 + 12345) >>> 0; return (hash >> 16) % 2; }
-    for(let y=0;y<size;y++){
-      for(let x=0;x<size;x++){
-        const inFinder = (x<7&&y<7) || (x>size-8&&y<7) || (x<7&&y>size-8);
-        if(inFinder) continue;
-        if(rand(x,y)) ctx.fillRect(x*cell, y*cell, cell, cell);
-      }
+  // Real, scannable QR code (vendor/qrcode.min.js, self-hosted — no external
+  // request from a visitor's browser when this screen loads).
+  function drawQR(canvas, text){
+    if(!window.QRCode || !window.QRCode.toCanvas){
+      // Extremely unlikely (the script tag failed to load) — hide the QR
+      // block rather than show something that looks real but isn't.
+      canvas.closest('.qr-wrap').hidden = true;
+      return;
     }
-    [[0,0],[size-7,0],[0,size-7]].forEach(([fx,fy])=>{
-      ctx.fillStyle = '#152825'; ctx.fillRect(fx*cell, fy*cell, 7*cell, 7*cell);
-      ctx.fillStyle = '#fff'; ctx.fillRect((fx+1)*cell, (fy+1)*cell, 5*cell, 5*cell);
-      ctx.fillStyle = '#152825'; ctx.fillRect((fx+2)*cell, (fy+2)*cell, 3*cell, 3*cell);
+    window.QRCode.toCanvas(canvas, text, { width: 132, margin: 1,
+      color: { dark: '#152825', light: '#ffffff' } }, function(err){
+      if(err) canvas.closest('.qr-wrap').hidden = true;
     });
   }
 

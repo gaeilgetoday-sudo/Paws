@@ -1,0 +1,54 @@
+name: Backup memorials
+
+# Routine, automated backup of everything in the "memorials" Blobs store —
+# separate from Netlify itself, so the site's only copy of irreplaceable
+# content (photos, stories, guestbook messages) doesn't depend on one live
+# Blob store.
+#
+# The output is uploaded as a GitHub Actions artifact, NOT committed to the
+# repository. Artifacts are private to people with access to this repo and
+# expire automatically (see retention-days below) — this deliberately keeps
+# personal data (names, photos, email addresses) out of permanent git
+# history, while still giving routine, restorable backups.
+#
+# SETUP REQUIRED before this can run:
+#   Repo → Settings → Secrets and variables → Actions → New repository secret
+#     NETLIFY_SITE_ID     (Netlify → Site configuration → General)
+#     NETLIFY_API_TOKEN   (Netlify → User settings → Applications → Personal access tokens)
+#
+# To restore from a backup:
+#   1. Actions tab → this workflow → pick a run → download the artifact
+#   2. node scripts/restore-memorial.mjs ./backup-output <memorial-id>
+#
+# Run scripts/restore-memorial.mjs periodically against a throwaway id to
+# confirm this whole path still works — a backup that's never been restored
+# from is unproven.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"  # daily at 03:17 UTC — an off-peak, arbitrary minute
+  workflow_dispatch: {}     # lets you trigger a backup manually from the Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Take backup
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_API_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
+        run: node scripts/backup-memorials.mjs ./backup-output
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: memorials-backup-${{ github.run_id }}
+          path: backup-output/
+          retention-days: 35

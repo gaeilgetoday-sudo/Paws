@@ -151,6 +151,13 @@ export default async (req) => {
     return new Response("Payment not completed.", { status: 402 });
   }
 
+  // A paid session alone isn't enough — it must be a paid session for *this*
+  // product. Without this check, a memorial purchase's session_id would also
+  // unlock a free booklet download.
+  if (session.metadata?.product !== "booklet") {
+    return new Response("This purchase isn't for the wishes booklet.", { status: 402 });
+  }
+
   const fields = Object.fromEntries(
     (session.custom_fields || []).map((f) => [f.key, f.text?.value])
   );

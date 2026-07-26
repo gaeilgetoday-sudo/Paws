@@ -92,7 +92,7 @@ footer .brand{color:var(--paper);font-family:Georgia,serif;font-size:.98rem;marg
 @media(max-width:560px){.hero h1{font-size:2.2rem}.gallery{grid-template-columns:repeat(2,1fr)}}
 `;
 
-function renderPage(m, messages) {
+function renderPage(m, messages, photoPaths) {
   const meta = [
     m.species,
     [m.born && fmtDate(m.born), m.died && fmtDate(m.died)].filter(Boolean).join(" — "),
@@ -112,8 +112,8 @@ function renderPage(m, messages) {
 </head>
 <body>
 <header class="hero">
-  ${m.photo
-      ? `<img src="${m.photo}" alt="${esc(m.name)}">`
+  ${photoPaths.hero
+      ? `<img src="${photoPaths.hero}" alt="${esc(m.name)}">`
       : `<div class="paw" role="img" aria-label="Paw print">🐾</div>`}
   <div class="eyebrow">A Kindred Paws memorial</div>
   <h1>${esc(m.name)}</h1>
@@ -125,11 +125,11 @@ ${m.story ? `<section><div class="wrap">
   <p class="story">${esc(m.story)}</p>
 </div></section><hr>` : ""}
 
-${(m.memories || []).length ? `<section><div class="wrap">
+${photoPaths.memories.length ? `<section><div class="wrap">
   <div class="label">Photographs</div>
   <h2>A few of our favourites</h2>
   <div class="gallery">
-    ${m.memories.map((src, i) =>
+    ${photoPaths.memories.map((src, i) =>
       `<img src="${src}" alt="${esc(m.name)} — photo ${i + 1}" loading="lazy">`).join("\n    ")}
   </div>
 </div></section><hr>` : ""}
@@ -256,6 +256,26 @@ async function main() {
     token: process.env.NETLIFY_API_TOKEN,
     consistency: "strong",
   });
+  const photos = getStore({
+    name: "photos",
+    siteID: process.env.NETLIFY_SITE_ID,
+    token: process.env.NETLIFY_API_TOKEN,
+    consistency: "strong",
+  });
+
+  const EXT_BY_TYPE = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+
+  /** Fetches one photo by id and writes it under remember/images/{slug}/. */
+  async function writePhoto(id, slug, filename) {
+    if (!id) return null;
+    const result = await photos.getWithMetadata(`photo/${id}`, { type: "arrayBuffer" });
+    if (!result) return null;
+    const ext = EXT_BY_TYPE[result.metadata?.contentType] || "jpg";
+    const relDir = path.join("images", slug);
+    await fs.mkdir(path.join(OUT, "remember", relDir), { recursive: true });
+    await fs.writeFile(path.join(OUT, "remember", relDir, `${filename}.${ext}`), Buffer.from(result.data));
+    return `${relDir}/${filename}.${ext}`;
+  }
 
   await fs.mkdir(path.join(OUT, "remember"), { recursive: true });
 
@@ -280,14 +300,23 @@ async function main() {
       .filter(e => e.status === "approved")
       .sort((a, b2) => (a.at < b2.at ? -1 : 1));
 
+    const photoPaths = {
+      hero: await writePhoto(m.photo, m.slug, "hero"),
+      memories: (
+        await Promise.all(
+          (m.memories || []).map((id, i) => writePhoto(id, m.slug, `memory-${i}`))
+        )
+      ).filter(Boolean),
+    };
+
     await fs.writeFile(
       path.join(OUT, "remember", `${m.slug}.html`),
-      renderPage(m, approved),
+      renderPage(m, approved, photoPaths),
       "utf8"
     );
 
     written.push({ slug: m.slug, name: m.name, privacy: m.privacy });
-    console.log(`  ✓ ${m.name} → remember/${m.slug}.html (${approved.length} message(s), ${m.candles || 0} candle(s))`);
+    console.log(`  ✓ ${m.name} → remember/${m.slug}.html (${approved.length} message(s), ${m.candles || 0} candle(s), ${(photoPaths.hero ? 1 : 0) + photoPaths.memories.length} photo(s))`);
   }
 
   await fs.writeFile(path.join(OUT, "remember.html"), renderRedirect(), "utf8");

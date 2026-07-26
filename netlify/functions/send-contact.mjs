@@ -9,7 +9,7 @@
 //   MAIL_FROM        already set for sign-in links
 //   CONTACT_TO       where contact messages should be delivered
 
-import { json } from "../lib/memorial-store.mjs";
+import { json, checkRateLimit, clientIp } from "../lib/memorial-store.mjs";
 
 const esc = (s) =>
   String(s ?? "")
@@ -25,7 +25,7 @@ const SUBJECTS = {
   partner: "Working together",
 };
 
-export default async (req) => {
+export default async (req, context) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   let body;
@@ -38,6 +38,12 @@ export default async (req) => {
   // A hidden field real people never fill in. Cheap, invisible, and doesn't
   // put a puzzle in front of someone who's grieving.
   if (body.website) return json({ ok: true });
+
+  const allowed = await checkRateLimit("contact", clientIp(req, context), {
+    max: 5,
+    windowMs: 60 * 60 * 1000,
+  });
+  if (!allowed) return json({ error: "Please wait a little before sending another message." }, 429);
 
   const name = String(body.name || "").trim().slice(0, 80);
   const email = String(body.email || "").trim().slice(0, 160);
@@ -82,7 +88,9 @@ ${esc(message)}
       }),
     });
     if (!res.ok) {
-      console.error("Resend rejected contact send:", res.status, await res.text());
+      // Not res.text() here — Resend's error body can echo back the
+      // sender's address and the subject line, and shouldn't end up in logs.
+      console.error("Resend rejected contact send:", res.status);
       return json({ error: "That didn't send. Please email us directly instead." }, 502);
     }
   } catch (err) {

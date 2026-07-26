@@ -9,11 +9,11 @@
 // signature) and remain subject to individual erasure requests regardless of
 // anything the page owner decides.
 
-import { getMemorialBySlug, getGuestbook, putGuestbook, newId, isDeleted, json } from "../lib/memorial-store.mjs";
+import { getMemorialBySlug, getGuestbook, putGuestbook, newId, isDeleted, isGuestbookClosed, checkRateLimit, clientIp, json } from "../lib/memorial-store.mjs";
 
 const MAX_MESSAGES = 500;
 
-export default async (req) => {
+export default async (req, context) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   let body;
@@ -29,6 +29,20 @@ export default async (req) => {
   }
   if (record.guestbookOn === false) {
     return json({ error: "The guestbook is closed." }, 403);
+  }
+  if (isGuestbookClosed(record)) {
+    return json({ error: "The guestbook is closed." }, 403);
+  }
+
+  // Per page: stops one address from filling a single guestbook. Per
+  // address overall: stops the same script from spraying many pages.
+  const ip = clientIp(req, context);
+  const [pageOk, globalOk] = await Promise.all([
+    checkRateLimit(`guestbook:${record.id}`, ip, { max: 8, windowMs: 60 * 60 * 1000 }),
+    checkRateLimit("guestbook-global", ip, { max: 20, windowMs: 60 * 60 * 1000 }),
+  ]);
+  if (!pageOk || !globalOk) {
+    return json({ error: "Please wait a little before sending another message." }, 429);
   }
 
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";

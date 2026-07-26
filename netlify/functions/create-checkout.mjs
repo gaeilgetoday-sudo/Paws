@@ -38,6 +38,11 @@ export default async (req) => {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+      // Tags this session so downstream verification (get-booklet.mjs) can
+      // confirm someone actually bought the booklet, not just that *some*
+      // Stripe session was paid — without this, any paid session (including
+      // a memorial purchase) could unlock a booklet download.
+      metadata: { product: "booklet" },
       custom_fields: [
         {
           key: "pet_name",

@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A memorial — Kindred Paws</title>
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="noindex, nofollow" id="robotsTag">
+<!-- Default stays noindex until we know the page's privacy setting (below);
+     public pages remove this restriction once loaded. Note: search engines
+     don't always re-check JS-updated meta tags reliably, so a server-rendered
+     or prerendered version would be a stronger long-term fix than this. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -114,6 +118,7 @@ footer a{color:#a9c4bc;}
     <div class="hero-eyebrow">A Kindred Paws memorial</div>
     <h1 id="petName"></h1>
     <p class="dates" id="petMeta"></p>
+    <p class="dates" id="lovedBy" style="opacity:.75;"></p>
   </header>
 
   <section id="storySection" class="hidden">
@@ -256,10 +261,17 @@ async function load(){
   const meta = [m.species, [m.born && fmtDate(m.born), m.died && fmtDate(m.died)].filter(Boolean).join(' — ')]
     .filter(Boolean).join(' · ');
   $('petMeta').textContent = meta;
+  if(m.lovedBy){ $('lovedBy').textContent = 'Loved by ' + m.lovedBy; }
   $('candleHeading').textContent = 'Thinking of ' + m.name;
 
+  // Public pages become indexable once we know that's what the owner chose;
+  // unlisted (and anything else) keeps the default noindex from the head.
+  if(m.privacy === 'public'){
+    document.getElementById('robotsTag').setAttribute('content', 'index, follow');
+  }
+
   if(m.photo){
-    $('heroPhoto').src = m.photo;
+    $('heroPhoto').src = '/.netlify/functions/get-photo?id=' + encodeURIComponent(m.photo);
     $('heroPhoto').alt = m.name;
     show($('heroPhoto')); hide($('heroFallback'));
   }
@@ -268,9 +280,10 @@ async function load(){
 
   if(m.memories && m.memories.length){
     const grid = $('galleryGrid');
-    m.memories.forEach((src, i) => {
+    m.memories.forEach((id, i) => {
       const img = document.createElement('img');
-      img.src = src; img.alt = m.name + ' — photo ' + (i + 1); img.loading = 'lazy';
+      img.src = '/.netlify/functions/get-photo?id=' + encodeURIComponent(id);
+      img.alt = m.name + ' — photo ' + (i + 1); img.loading = 'lazy';
       grid.appendChild(img);
     });
     show($('gallerySection'));
@@ -282,6 +295,16 @@ async function load(){
   if(m.guestbookOn === false){
     hide($('guestbookSection')); hide($('gbDivider'));
   }else{
+    // Wording matches the owner's actual setting rather than always
+    // claiming messages are reviewed.
+    if(m.moderationOn === false){
+      $('gbNote').textContent = 'Messages appear right away.';
+      $('gbSubmit').textContent = 'Post message';
+    }
+    if(m.guestbookClosed){
+      hide($('gbForm'));
+      $('gbNote').textContent = "This guestbook is now closed to new messages.";
+    }
     renderMessages(m.messages || []);
   }
 
@@ -297,8 +320,8 @@ async function load(){
   }
 
   $('privacyNote').textContent = m.privacy === 'unlisted'
-    ? 'This page is unlisted — only people with the link can see it.'
-    : 'This page is public.';
+    ? 'This page is unlisted — only people with the link can see it, and it will not appear in search results.'
+    : 'This page is public and may appear in search results.';
 
   hide($('loading'));
   show($('page'));

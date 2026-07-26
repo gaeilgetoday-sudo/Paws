@@ -6,15 +6,21 @@
 // The first save verifies the Stripe reference is genuinely paid; later saves
 // just match it against the stored record, so ordinary typing doesn't wait on
 // a round trip to Stripe.
+//
+// Photos are NOT part of this payload — they're uploaded separately via
+// upload-photo.mjs and referenced here only by id (see memorial-store.mjs).
+// That's what keeps this endpoint small and fast even on a page with a full
+// gallery: a story edit no longer re-sends eight photos to re-save one
+// sentence.
 
 import {
-  getMemorial, putMemorial, findByReference, verifyPaidReference,
-  indexMemorial, newId, json,
+  putMemorial, ensureRecordForReference, indexMemorial, isValidPhotoId, json,
 } from "../lib/memorial-store.mjs";
 
-// Guards against a runaway payload — photos are resized in the browser first,
-// so a legitimate memorial lands well under this.
-const MAX_BYTES = 12 * 1024 * 1024;
+// Text-only now that photos live elsewhere — this is generous headroom for
+// the longest legitimate story plus every other field, not a limit anyone
+// should ever bump into honestly.
+const MAX_BYTES = 300_000;
 
 const str = (v, max) => (typeof v === "string" ? v.slice(0, max) : "");
 
@@ -25,10 +31,10 @@ function cleanInput(body) {
     born: str(body.born, 20),
     died: str(body.died, 20),
     lovedBy: str(body.lovedBy, 80),
-    photo: str(body.photo, 4_000_000) || null,
+    photo: isValidPhotoId(body.photo) ? body.photo : null,
     story: str(body.story, 20_000),
     memories: Array.isArray(body.memories)
-      ? body.memories.filter((m) => typeof m === "string").slice(0, 8)
+      ? body.memories.filter(isValidPhotoId).slice(0, 8)
       : [],
     privacy: ["public", "unlisted", "private"].includes(body.privacy)
       ? body.privacy
@@ -65,25 +71,8 @@ export default async (req) => {
   }
 
   const reference = typeof body.reference === "string" ? body.reference : "";
-  if (!reference) return json({ error: "Missing reference." }, 401);
-
-  let record = await findByReference(reference);
-
-  if (!record) {
-    // First save for this purchase — this is the one time we ask Stripe.
-    const paid = await verifyPaidReference(reference);
-    if (!paid) return json({ error: "This purchase couldn't be verified." }, 402);
-
-    record = {
-      id: newId(),
-      reference,
-      ownerEmail: typeof body.email === "string" ? body.email.slice(0, 160) : null,
-      createdAt: new Date().toISOString(),
-      published: false,
-      slug: null,
-      candles: 0,
-    };
-  }
+  const { record, error, status } = await ensureRecordForReference(reference, "memorial");
+  if (error) return json({ error }, status);
 
   Object.assign(record, cleanInput(body));
   await putMemorial(record);

@@ -42,6 +42,11 @@ export default async (req) => {
       line_items: [
         { price: process.env.STRIPE_MEMORIAL_PRICE_ID, quantity: 1 },
       ],
+      // Tags this session so downstream verification (verify-memorial-access.mjs,
+      // save-memorial.mjs) can confirm someone actually bought the memorial
+      // page, not just that *some* Stripe session was paid — without this, a
+      // booklet purchase would also unlock the memorial builder.
+      metadata: { product: "memorial" },
       submit_type: "pay",
       // Land straight in the builder, carrying the session so the builder can
       // verify the payment server-side before unlocking itself.
