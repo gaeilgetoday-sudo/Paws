@@ -40,6 +40,7 @@ must be added before the corresponding feature will work in production.
 | `NETLIFY_SITE_ID` | `scripts/archive-memorials.mjs`, `scripts/backup-memorials.mjs`, `scripts/restore-memorial.mjs` | Site configuration → General → Site ID. Also needed as a GitHub Actions repo secret for the scheduled backup workflow. |
 | `NETLIFY_API_TOKEN` | `scripts/archive-memorials.mjs`, `scripts/backup-memorials.mjs`, `scripts/restore-memorial.mjs` | Personal access token with Blobs read access. Also needed as a GitHub Actions repo secret for the scheduled backup workflow. |
 | `CLOSURE_DATE` | `scripts/archive-memorials.mjs` | Optional. Text shown on archived pages if the site winds down; defaults to the current month/year at run time. |
+| `ADMIN_PASSWORD` | `admin-*.mjs` functions | Password for `admin.html` — the internal support tool (search memorials, moderate messages, change settings, resend booklets/sign-in links). One shared password for one operator; if this ever needs more than one person, replace it with real per-person accounts before adding anyone. Pick something long and random, not a memorable phrase — this password protects every customer's data. |
 
 Also required, not an env var: **Netlify Blobs** must be enabled for the
 site (it's the storage layer `memorial-store.mjs` depends on — no extra
@@ -192,6 +193,30 @@ the file input, watched it save, published the page, loaded the public
 bytes served back (`naturalWidth` non-zero). This isn't a substitute for
 testing against a real Netlify deploy before launch, but it's a real
 functional test of the actual code paths, not just a syntax check.
+
+## Admin tool
+
+`admin.html` (password-gated via `ADMIN_PASSWORD`) is an internal support
+tool — not linked from anywhere on the public site. It covers:
+
+- Search memorials by name, owner email, slug, or Stripe reference
+- View full detail for one, **including messages still pending
+  moderation** — normally only the owner can see these at all
+- Approve / hide / delete guestbook messages on an owner's behalf
+- Change privacy, guestbook, moderation, and closure settings on an
+  owner's behalf
+- Resend a sign-in link to a specific memorial's owner
+- **Regenerate & resend the wishes booklet** with corrected names — there's
+  no stored booklet record to edit (the names live only in the completed
+  Stripe Checkout Session, which can't be edited after the fact), so this
+  regenerates the PDF from scratch and emails it; the original Stripe order
+  is untouched
+
+Sessions last 12 hours. Login attempts are rate-limited (5 per 15 minutes
+per address) against brute-forcing the password. This is one shared
+password for one operator — if this project ever needs more than one
+admin, replace this with real per-person accounts rather than sharing the
+password further.
 
 ## Local development
 

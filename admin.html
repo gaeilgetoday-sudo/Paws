@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Kindred Paws</title>
+<style>
+:root{--cream:#FAF5EC;--dusk:#1F3A36;--dusk-deep:#142623;--amber:#D98A3D;--amber-deep:#B96F28;
+--ink:#2B241C;--paper:#F3EEE3;--muted:#8A7F6D;--line:#DCD0B4;--danger:#B54A3B;--ok:#3E7A5C;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;}
+h1,h2,h3{font-family:Georgia,serif;margin:0;font-weight:600;}
+button,input,select{font-family:inherit;font-size:.92rem;}
+input,select{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);}
+button{cursor:pointer;border:none;border-radius:8px;padding:9px 16px;font-weight:600;}
+.btn-primary{background:var(--amber);color:#241505;}
+.btn-primary:hover{background:var(--amber-deep);}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger);}
+.btn-small{padding:5px 11px;font-size:.82rem;}
+a{color:var(--amber-deep);}
+.wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px;}
+.login-wrap{max-width:360px;margin:120px auto;padding:0 20px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:20px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.topbar h1{font-size:1.3rem;}
+.search-row{display:flex;gap:10px;margin-bottom:18px;}
+.search-row input{flex:1;}
+table{width:100%;border-collapse:collapse;font-size:.88rem;}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);}
+th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em;}
+tr.row{cursor:pointer;}
+tr.row:hover{background:var(--paper);}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:600;}
+.badge.public{background:#e4f3ea;color:var(--ok);}
+.badge.unlisted{background:#fff0dc;color:var(--amber-deep);}
+.badge.private{background:#f1e9e4;color:var(--muted);}
+.badge.deleted{background:#fbe4e0;color:var(--danger);}
+.pill{display:inline-block;background:var(--amber);color:#241505;border-radius:999px;padding:1px 8px;font-size:.75rem;font-weight:700;}
+.pill.zero{background:var(--line);color:var(--muted);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:5px;font-weight:600;}
+.field input,.field select{width:100%;}
+.row-flex{display:flex;gap:12px;flex-wrap:wrap;}
+.row-flex .field{flex:1;min-width:160px;}
+.msg{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+.msg .meta{font-size:.78rem;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+.msg .txt{white-space:pre-wrap;font-size:.9rem;}
+.msg .actions{margin-top:8px;display:flex;gap:8px;}
+.status-pending{border-left:3px solid var(--amber);}
+.status-hidden{opacity:.6;}
+.error{color:var(--danger);font-size:.85rem;margin-top:8px;}
+.ok-msg{color:var(--ok);font-size:.85rem;margin-top:8px;}
+.muted{color:var(--muted);font-size:.85rem;}
+.close-detail{float:right;}
+hidden,[hidden]{display:none!important;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-wrap">
+  <div class="card">
+    <h1 style="margin-bottom:18px;">Kindred Paws admin</h1>
+    <div class="field">
+      <label for="pw">Password</label>
+      <input type="password" id="pw" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="loginBtn" style="width:100%;">Sign in</button>
+    <div class="error" id="loginError"></div>
+  </div>
+</div>
+
+<div id="dashboard" class="wrap" hidden>
+  <div class="topbar">
+    <h1>Kindred Paws admin</h1>
+    <button class="btn-ghost btn-small" id="logoutBtn">Sign out</button>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.05rem;margin-bottom:14px;">Find a memorial</h2>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Name, email, slug, or reference...">
+      <button class="btn-primary" id="searchBtn">Search</button>
+    </div>
+    <div id="resultsWrap"><p class="muted">Search, or leave blank and search to list everything.</p></div>
+  </div>
+
+  <div class="card" id="detailCard" hidden>
+    <button class="btn-ghost btn-small close-detail" id="closeDetailBtn">Close</button>
+    <div id="detailBody"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.05rem;margin-bottom:6px;">Booklet — regenerate &amp; resend</h2>
+    <p class="muted" style="margin-bottom:14px;">There's no booklet record to edit — this regenerates the PDF fresh
+      from the Stripe session (correcting the names if needed) and emails it. The original order in Stripe isn't changed.</p>
+    <div class="field">
+      <label for="bkSession">Stripe Checkout Session ID</label>
+      <input type="text" id="bkSession" placeholder="cs_...">
+    </div>
+    <div class="row-flex">
+      <div class="field">
+        <label for="bkPetName">Corrected pet name (optional — leave blank to keep original)</label>
+        <input type="text" id="bkPetName">
+      </div>
+      <div class="field">
+        <label for="bkOwnerName">Corrected owner/family name (optional)</label>
+        <input type="text" id="bkOwnerName">
+      </div>
+    </div>
+    <div class="field">
+      <label for="bkEmail">Send to (optional — defaults to the email on the original order)</label>
+      <input type="email" id="bkEmail">
+    </div>
+    <button class="btn-primary" id="bkSendBtn">Regenerate &amp; send</button>
+    <div class="error" id="bkError"></div>
+    <div class="ok-msg" id="bkOk"></div>
+  </div>
+
+</div>
+
+<script>
+  const API = '/.netlify/functions/';
+  let token = sessionStorage.getItem('kp_admin_token') || '';
+
+  function $(id){ return document.getElementById(id); }
+
+  async function api(name, opts = {}) {
+    const res = await fetch(API + name, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, ...(opts.headers||{}) },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) { signOut(); throw new Error('Session expired — please sign in again.'); }
+    if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+    return data;
+  }
+
+  function showDashboard(){ $('loginScreen').hidden = true; $('dashboard').hidden = false; }
+  function showLogin(){ $('loginScreen').hidden = false; $('dashboard').hidden = true; }
+  function signOut(){ token = ''; sessionStorage.removeItem('kp_admin_token'); showLogin(); }
+
+  $('loginBtn').addEventListener('click', async () => {
+    $('loginError').textContent = '';
+    try {
+      const res = await fetch(API + 'admin-login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: $('pw').value }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Sign-in failed.');
+      token = data.token;
+      sessionStorage.setItem('kp_admin_token', token);
+      $('pw').value = '';
+      showDashboard();
+      doSearch();
+    } catch (err) {
+      $('loginError').textContent = err.message;
+    }
+  });
+  $('pw').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+  $('logoutBtn').addEventListener('click', signOut);
+
+  // ---------------- search ----------------
+  async function doSearch() {
+    $('resultsWrap').innerHTML = '<p class="muted">Searching…</p>';
+    try {
+      const data = await api('admin-list-memorials?q=' + encodeURIComponent($('searchInput').value.trim()));
+      renderResults(data.memorials);
+    } catch (err) {
+      $('resultsWrap').innerHTML = '<p class="error">' + escapeHtml(err.message) + '</p>';
+    }
+  }
+  $('searchBtn').addEventListener('click', doSearch);
+  $('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+  function renderResults(list) {
+    if (!list.length) { $('resultsWrap').innerHTML = '<p class="muted">No matches.</p>'; return; }
+    let html = '<table><tr><th>Name</th><th>Owner email</th><th>Status</th><th>Candles</th><th>Messages</th></tr>';
+    list.forEach(m => {
+      const statusBadges = [];
+      if (m.deleted) statusBadges.push('<span class="badge deleted">Deleted</span>');
+      else if (!m.published) statusBadges.push('<span class="badge private">Draft</span>');
+      else statusBadges.push('<span class="badge ' + m.privacy + '">' + m.privacy + '</span>');
+      const msgBit = m.pendingMessages
+        ? '<span class="pill">' + m.pendingMessages + ' waiting</span>'
+        : '<span class="pill zero">' + m.totalMessages + '</span>';
+      html += '<tr class="row" data-id="' + m.id + '">' +
+        '<td>' + escapeHtml(m.name || '(unnamed)') + '</td>' +
+        '<td>' + escapeHtml(m.ownerEmail || '—') + '</td>' +
+        '<td>' + statusBadges.join(' ') + '</td>' +
+        '<td>' + m.candles + '</td>' +
+        '<td>' + msgBit + '</td>' +
+        '</tr>';
+    });
+    html += '</table>';
+    $('resultsWrap').innerHTML = html;
+    document.querySelectorAll('tr.row').forEach(row => {
+      row.addEventListener('click', () => openDetail(row.dataset.id));
+    });
+  }
+
+  // ---------------- detail ----------------
+  $('closeDetailBtn').addEventListener('click', () => { $('detailCard').hidden = true; });
+
+  async function openDetail(id) {
+    $('detailCard').hidden = false;
+    $('detailBody').innerHTML = '<p class="muted">Loading…</p>';
+    $('detailCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try {
+      const data = await api('admin-get-memorial?id=' + encodeURIComponent(id));
+      renderDetail(data.memorial, data.messages);
+    } catch (err) {
+      $('detailBody').innerHTML = '<p class="error">' + escapeHtml(err.message) + '</p>';
+    }
+  }
+
+  function renderDetail(m, messages) {
+    const pageUrl = m.slug ? (location.origin + '/remember.html?p=' + m.slug) : null;
+    let html = '<h2 style="margin-bottom:4px;">' + escapeHtml(m.name || '(unnamed)') + '</h2>';
+    html += '<p class="muted" style="margin-bottom:16px;">' + escapeHtml(m.ownerEmail || 'no owner email on file') +
+      (pageUrl ? ' · <a href="' + pageUrl + '" target="_blank" rel="noopener">View public page</a>' : ' · not yet published') +
+      '</p>';
+
+    html += '<div class="row-flex">';
+    html += '<div class="field"><label>Privacy</label><select id="fPrivacy">' +
+      ['public','unlisted','private'].map(v => '<option value="'+v+'"'+(m.privacy===v?' selected':'')+'>'+v+'</option>').join('') +
+      '</select></div>';
+    html += '<div class="field"><label>Guestbook</label><select id="fGuestbook">' +
+      '<option value="true"'+(m.guestbookOn!==false?' selected':'')+'>On</option>' +
+      '<option value="false"'+(m.guestbookOn===false?' selected':'')+'>Off</option></select></div>';
+    html += '<div class="field"><label>Moderation</label><select id="fModeration">' +
+      '<option value="true"'+(m.moderationOn!==false?' selected':'')+'>On</option>' +
+      '<option value="false"'+(m.moderationOn===false?' selected':'')+'>Off</option></select></div>';
+    html += '<div class="field"><label>Guestbook closes</label><select id="fCloseAfter">' +
+      [['never','Never'],['8w','8 weeks'],['6m','6 months'],['1y','1 year']]
+        .map(([v,l]) => '<option value="'+v+'"'+(m.closeAfter===v?' selected':'')+'>'+l+'</option>').join('') +
+      '</select></div>';
+    html += '</div>';
+    html += '<button class="btn-primary btn-small" id="saveSettingsBtn">Save settings</button> ';
+    html += '<button class="btn-ghost btn-small" id="resendSigninBtn">Resend sign-in link</button>';
+    html += '<div class="error" id="detailError"></div><div class="ok-msg" id="detailOk"></div>';
+
+    html += '<h3 style="margin:22px 0 10px;font-size:.95rem;">Messages (' + messages.length + ')</h3>';
+    if (!messages.length) {
+      html += '<p class="muted">None yet.</p>';
+    } else {
+      messages.slice().sort((a,b) => a.at < b.at ? 1 : -1).forEach(msg => {
+        html += '<div class="msg status-' + msg.status + '" data-msgid="' + msg.id + '">';
+        html += '<div class="meta"><span>' + escapeHtml(msg.name || 'Anonymous') + ' · ' + msg.status + ' · ' + new Date(msg.at).toLocaleString() + '</span></div>';
+        html += '<div class="txt">' + escapeHtml(msg.message) + '</div>';
+        html += '<div class="actions">';
+        if (msg.status !== 'approved') html += '<button class="btn-ghost btn-small act" data-action="approve">Approve</button>';
+        if (msg.status !== 'hidden') html += '<button class="btn-ghost btn-small act" data-action="hide">Hide</button>';
+        html += '<button class="btn-danger btn-small act" data-action="delete">Delete</button>';
+        html += '</div></div>';
+      });
+    }
+
+    $('detailBody').innerHTML = html;
+
+    $('saveSettingsBtn').addEventListener('click', async () => {
+      $('detailError').textContent = ''; $('detailOk').textContent = '';
+      try {
+        await api('admin-update-settings', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: m.id,
+            privacy: $('fPrivacy').value,
+            guestbookOn: $('fGuestbook').value === 'true',
+            moderationOn: $('fModeration').value === 'true',
+            closeAfter: $('fCloseAfter').value,
+          }),
+        });
+        $('detailOk').textContent = 'Saved.';
+        doSearch();
+      } catch (err) { $('detailError').textContent = err.message; }
+    });
+
+    $('resendSigninBtn').addEventListener('click', async () => {
+      $('detailError').textContent = ''; $('detailOk').textContent = '';
+      try {
+        await api('admin-resend-signin', { method: 'POST', body: JSON.stringify({ id: m.id }) });
+        $('detailOk').textContent = 'Sign-in link sent to ' + (m.ownerEmail || 'the owner') + '.';
+      } catch (err) { $('detailError').textContent = err.message; }
+    });
+
+    document.querySelectorAll('.msg .act').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const msgId = btn.closest('.msg').dataset.msgid;
+        try {
+          await api('admin-moderate-message', {
+            method: 'POST',
+            body: JSON.stringify({ id: m.id, messageId: msgId, action: btn.dataset.action }),
+          });
+          openDetail(m.id); // refresh
+        } catch (err) { $('detailError').textContent = err.message; }
+      });
+    });
+  }
+
+  // ---------------- booklet tool ----------------
+  $('bkSendBtn').addEventListener('click', async () => {
+    $('bkError').textContent = ''; $('bkOk').textContent = '';
+    try {
+      const data = await api('admin-resend-booklet', {
+        method: 'POST',
+        body: JSON.stringify({
+          session_id: $('bkSession').value.trim(),
+          petName: $('bkPetName').value.trim(),
+          ownerName: $('bkOwnerName').value.trim(),
+          email: $('bkEmail').value.trim(),
+        }),
+      });
+      $('bkOk').textContent = 'Sent to ' + data.sentTo + ' — personalised for ' + data.petName + '.';
+    } catch (err) {
+      $('bkError').textContent = err.message;
+    }
+  });
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // ---------------- boot ----------------
+  if (token) { showDashboard(); doSearch(); } else { showLogin(); }
+</script>
+
+</body>
+</html>
