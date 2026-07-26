@@ -394,7 +394,7 @@
           <input type="text" id="celebTitle" placeholder="e.g. A gathering for Bramble">
         </div>
         <div class="grid-2">
-          <div class="field"><label for="celebDate">Date &amp; time</label><input type="date" id="celebDate"></div>
+          <div class="field"><label for="celebDate">Date &amp; time</label><input type="datetime-local" id="celebDate"></div>
           <div class="field"><label for="celebLoc">Location or online link</label><input type="text" id="celebLoc" placeholder="e.g. The back garden, 3pm"></div>
         </div>
         <div class="switch-row">
@@ -438,6 +438,7 @@
           <input type="text" id="pageLink" readonly>
           <button class="copy-btn" id="copyLink" type="button">Copy link</button>
         </div>
+        <a id="viewPageLink" class="btn btn-back" target="_blank" rel="noopener" style="display:inline-flex;text-decoration:none;margin:12px 0 4px;">View your page</a>
         <div class="qr-wrap"><canvas id="qrCanvas" width="132" height="132"></canvas></div>
         <div class="share-block">
           <div class="share-item">
@@ -698,7 +699,13 @@
   document.querySelectorAll('.chip').forEach(chip=>{
     chip.addEventListener('click', ()=>{
       const prompt = chip.dataset.prompt;
-      const insert = (storyEl.value ? storyEl.value + '\n\n' : '') + prompt + '\n';
+      // Question-style prompts ("How did they come into your life?") read as
+      // their own line with the answer below. Sentence-starter prompts
+      // ("A memory that always makes me smile") are meant to be completed
+      // inline — without this, an answer typed straight after either kind
+      // used to run together with zero punctuation ("...smile That look").
+      const separator = /\?\s*$/.test(prompt) ? '\n' : ': ';
+      const insert = (storyEl.value ? storyEl.value + '\n\n' : '') + prompt + separator;
       storyEl.value = insert;
       state.story = insert;
       storyEl.focus();
@@ -786,11 +793,21 @@
   document.getElementById('celebMemory').addEventListener('change', e=>{ state.celebMemory = e.target.checked; queueSave(); });
   document.getElementById('celebDonations').addEventListener('change', e=>{ state.celebDonations = e.target.checked; queueSave(); });
 
+  function fmtDate(v){
+    if(!v) return '';
+    const dt = new Date(v);
+    return isNaN(dt) ? v : dt.toLocaleDateString('en-IE', { year:'numeric', month:'long', day:'numeric' });
+  }
   // ---------- step 9 : preview ----------
   function renderPreview(){
     const name = state.name.trim() || 'Their name';
-    const dates = (state.born || state.died) ? (state.born||'—') + ' – ' + (state.died||'—') : '';
-    const loved = state.lovedBy ? 'Loved by ' + state.lovedBy : '';
+    // Only ever shows dates that actually exist — previously this fell back
+    // to a literal "—" placeholder for a missing date, which produced
+    // garbled raw output like "— – 2026-07-24" whenever only one date (or
+    // neither) had been filled in.
+    const dates = [state.born && fmtDate(state.born), state.died && fmtDate(state.died)]
+      .filter(Boolean).join(' — ');
+    const loved = state.lovedBy ? 'Loved by ' + escapeHtml(state.lovedBy) : '';
     const meta = [loved, dates].filter(Boolean).join(' · ');
     const privacyLabel = {public:'Public',unlisted:'Unlisted',private:'Private'}[state.privacy];
 
@@ -818,12 +835,18 @@
     if(state.celebEnabled){
       html += '<div class="preview-section-label">Life celebration</div>';
       html += '<div class="preview-event"><strong>' + (state.celebTitle || 'A gathering for ' + name) + '</strong><br>' +
-              (state.celebDate || 'Date TBC') + (state.celebLoc ? ' · ' + state.celebLoc : '') + '</div>';
+              (fmtCelebDate(state.celebDate) || 'Date TBC') + (state.celebLoc ? ' · ' + escapeHtml(state.celebLoc) : '') + '</div>';
     }
     document.getElementById('previewPage').innerHTML = html;
     document.querySelector('.edit-pill').addEventListener('click', ()=> goTo(2));
   }
   function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmtCelebDate(v){
+    if(!v) return '';
+    const dt = new Date(v);
+    if(isNaN(dt)) return escapeHtml(v);
+    return dt.toLocaleString('en-IE', { year:'numeric', month:'long', day:'numeric', hour:'numeric', minute:'2-digit' });
+  }
 
   // ---------- persistence ----------
   // Photos are resized in the browser before saving. A modern phone photo is
@@ -974,6 +997,7 @@
     document.getElementById('postPublish').hidden = false;
     const link = location.origin + '/remember.html?p=' + slug;
     document.getElementById('pageLink').value = link;
+    document.getElementById('viewPageLink').href = link;
     drawQR(document.getElementById('qrCanvas'), link);
     const name = state.name.trim() || 'them';
     document.getElementById('shareText1').textContent = 'We made a page to remember ' + name + ' — ' + link;

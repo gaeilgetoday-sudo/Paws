@@ -179,7 +179,7 @@ footer a{color:#a9c4bc;}
   <footer>
     <div class="fbrand">Kindred Paws&trade;</div>
     <div id="privacyNote"></div>
-    <div style="margin-top:12px;"><a href="index.html">Make a page for your own pet</a></div>
+    <div style="margin-top:12px;"><a href="index.html">Explore Kindred Paws</a></div>
     <div style="margin-top:10px;font-size:.75rem;opacity:.8;"><a href="privacy.html">Privacy</a> &middot; <a href="contact.html">Contact</a></div>
   </footer>
 </main>
@@ -241,6 +241,12 @@ function fmtDate(d){
   if(!d) return '';
   const dt = new Date(d);
   return isNaN(dt) ? d : dt.toLocaleDateString('en-IE', { year:'numeric', month:'long', day:'numeric' });
+}
+
+function fmtCelebDate(d){
+  if(!d) return '';
+  const dt = new Date(d);
+  return isNaN(dt) ? d : dt.toLocaleString('en-IE', { year:'numeric', month:'long', day:'numeric', hour:'numeric', minute:'2-digit' });
 }
 
 async function load(){
@@ -310,7 +316,7 @@ async function load(){
 
   if(m.celebration){
     $('eventTitle').textContent = m.celebration.title || ('A gathering for ' + m.name);
-    const bits = [fmtDate(m.celebration.date), m.celebration.location].filter(Boolean);
+    const bits = [fmtCelebDate(m.celebration.date), m.celebration.location].filter(Boolean);
     const extras = [];
     if(m.celebration.kids) extras.push('Children welcome');
     if(m.celebration.memory) extras.push('Bring a memory or photo');
