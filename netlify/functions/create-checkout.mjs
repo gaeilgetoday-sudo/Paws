@@ -59,7 +59,7 @@ export default async (req) => {
         },
         {
           key: "owner_name",
-          label: { type: "custom", custom: "Your name (or family name)" },
+          label: { type: "custom", custom: "Your name, or your family's name" },
           type: "text",
           text: { maximum_length: 60 },
         },

@@ -32,7 +32,15 @@
   }
   .btn:hover{background:var(--amber-deep); transform:translateY(-1px);}
   .btn[disabled]{opacity:.5; cursor:default; transform:none;}
+  .btn-ghost{
+    display:inline-flex; align-items:center; gap:.5em; font-weight:600; font-size:.95rem;
+    padding:.9em 1.7em; border-radius:999px; text-decoration:none;
+    background:transparent; color:var(--dusk); border:1.5px solid rgba(43,36,28,.18);
+  }
+  .btn-ghost:hover{border-color:var(--dusk);}
+  .next-steps{display:flex; gap:.7em; justify-content:center; flex-wrap:wrap; margin-top:1.4em;}
   .state{font-size:.85rem; opacity:.65; margin-top:1.2em;}
+  .state.emailed{opacity:.85; color:var(--amber-deep); font-weight:500;}
   .spinner{
     width:34px;height:34px;border-radius:50%;margin:0 auto 18px;
     border:3px solid rgba(43,36,28,.15); border-top-color:var(--amber);
@@ -55,13 +63,38 @@
   const sessionId = params.get('session_id');
   const card = document.getElementById('card');
 
-  function showReady(downloadUrl) {
+  function showReady(downloadUrl, sessionId) {
     card.innerHTML = `
       <h1>Just In Case, With Love is ready.</h1>
       <p>It's personalized and ready to download. Keep it somewhere safe — you can print it or fill it in on screen, whenever feels right.</p>
       <a class="btn" href="${downloadUrl}" download>Download it now</a>
-      <div class="state">If the download doesn't start, use the button above — this link works whenever you need it.</div>
+      <div class="next-steps">
+        <a class="btn-ghost" href="index.html">Back to Kindred Paws</a>
+      </div>
+      <div class="state" id="emailState">If the download doesn't start, use the button above — you can come back to this exact page any time you still have this link.</div>
     `;
+
+    // Fire-and-forget: a backup copy by email, so the download isn't the
+    // only place this ever exists. Doesn't block or affect the download
+    // button either way — if this fails silently (e.g. email isn't set up
+    // yet), the customer still has everything they need above.
+    fetch('/.netlify/functions/email-booklet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId }),
+    })
+      .then(res => res.json())
+      .then(d => {
+        const el = document.getElementById('emailState');
+        if (!el) return;
+        if (d.ok) {
+          el.textContent = "We've also emailed a copy to you, so it's not lost if you close this tab.";
+          el.classList.add('emailed');
+        }
+        // If it didn't send, leave the original wording — no need to
+        // surface a technical failure the customer can't do anything about.
+      })
+      .catch(() => { /* same — quietly leave the original wording */ });
   }
 
   function showError(message) {
@@ -78,7 +111,7 @@
     const downloadUrl = `/.netlify/functions/get-booklet?session_id=${encodeURIComponent(sessionId)}`;
     // Show the ready state immediately — the download link itself verifies
     // payment server-side, so there's nothing to poll for here.
-    showReady(downloadUrl);
+    showReady(downloadUrl, sessionId);
   }
 </script>
 
