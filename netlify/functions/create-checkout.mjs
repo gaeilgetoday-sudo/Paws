@@ -43,6 +43,13 @@ export default async (req) => {
       // Stripe session was paid — without this, any paid session (including
       // a memorial purchase) could unlock a booklet download.
       metadata: { product: "booklet" },
+      // New Stripe accounts default to Managed Payments, which requires an
+      // eligible tax code on every product or the session creation fails.
+      // Opting out here keeps things simple and predictable for now — this
+      // is a real decision to revisit deliberately before going live, not
+      // something to leave switched off by accident. See
+      // https://docs.stripe.com/payments/managed-payments/how-it-works
+      managed_payments: { enabled: false },
       custom_fields: [
         {
           key: "pet_name",

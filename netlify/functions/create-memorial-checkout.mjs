@@ -47,6 +47,15 @@ export default async (req) => {
       // page, not just that *some* Stripe session was paid — without this, a
       // booklet purchase would also unlock the memorial builder.
       metadata: { product: "memorial" },
+      // Same as create-checkout.mjs — new Stripe accounts default to
+      // Managed Payments, which requires an eligible tax code on every
+      // product or the session creation fails outright. Opting out for now;
+      // revisit deliberately before going live, since a memorial page (a
+      // hosted, moderated service) is a less clear-cut fit for Managed
+      // Payments' "fully automated digital product" eligibility rules than
+      // the booklet is anyway. See
+      // https://docs.stripe.com/payments/managed-payments/eligibility
+      managed_payments: { enabled: false },
       submit_type: "pay",
       // Land straight in the builder, carrying the session so the builder can
       // verify the payment server-side before unlocking itself.
