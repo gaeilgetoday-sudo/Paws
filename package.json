@@ -1,10 +1,11 @@
 {
   "name": "kindred-paws",
   "version": "1.0.0",
-  "description": "Kindred Paws — wishes booklet checkout & personalization functions",
+  "description": "Kindred Paws — booklet and memorial page functions",
   "private": true,
   "license": "UNLICENSED",
   "dependencies": {
+    "@netlify/blobs": "^8.1.0",
     "pdf-lib": "^1.17.1",
     "stripe": "^22.3.2"
   }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kindred Paws — Memorial Page Builder (Prototype)</title>
+<title>Build their memorial page — Kindred Paws</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,6 +27,11 @@
   :focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:6px;}
   button{font-family:inherit;}
 
+  [hidden]{display:none !important;}
+  .save-status{display:block;font-size:.72rem;margin-top:4px;opacity:.75;min-height:1em;}
+  .save-status[data-tone="ok"]{color:#3E5C46;}
+  .save-status[data-tone="warn"]{color:#B54A3B;}
+  .publish-error{margin-top:12px;font-size:.85rem;color:#B54A3B;min-height:1.1em;}
   .app{max-width:920px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--cream);}
 
   /* top bar */
@@ -155,6 +160,9 @@
   .preview-section-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.5;margin-bottom:.6em;}
   .preview-condolence{background:rgba(243,238,227,.06);border-left:2px solid var(--gold-line);padding:.8em 1em;border-radius:0 8px 8px 0;font-size:.88rem;font-style:italic;opacity:.85;margin-bottom:.6em;}
   .preview-event{background:rgba(227,168,92,.1);border:1px solid rgba(227,168,92,.25);border-radius:12px;padding:14px;font-size:.88rem;}
+  .preview-candles{background:rgba(243,238,227,.06);border-radius:10px;padding:.9em 1em;margin-bottom:1.4em;font-size:.9rem;letter-spacing:1px;}
+  .preview-candles span{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;opacity:.5;margin-top:.5em;}
+  .preview-modnote{font-size:.78rem;opacity:.55;margin-bottom:1.4em;}
 
   /* publish */
   .publish-box{text-align:center;padding:20px 0;}
@@ -188,18 +196,57 @@
   .skip{font-size:.85rem;opacity:.55;background:none;border:none;cursor:pointer;text-decoration:underline;}
 
   #hero-file, #memory-files{display:none;}
+
+  /* ---------- access gate ---------- */
+  /* Shown by default and only removed once payment is confirmed server-side,
+     so the builder stays locked even if scripts fail or someone edits the URL. */
+  .gate{
+    position:fixed;inset:0;z-index:200;background:var(--dusk-deep);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;padding:28px;text-align:center;
+  }
+  .gate[hidden]{display:none;}
+  .gate-inner{max-width:420px;}
+  .gate h2{color:var(--paper);font-size:1.5rem;margin-bottom:.5em;}
+  .gate p{opacity:.75;font-size:.95rem;}
+  .gate .btn-primary{display:inline-block;text-decoration:none;margin-top:1em;}
+  .gate-spinner{
+    width:32px;height:32px;border-radius:50%;margin:0 auto 20px;
+    border:3px solid rgba(243,238,227,.18);border-top-color:var(--amber);
+    animation:gspin .8s linear infinite;
+  }
+  @keyframes gspin{to{transform:rotate(360deg);}}
+
+  /* ---------- not-live warning ---------- */
+  .not-live{
+    background:#FFF3E0;border:1.5px solid var(--amber);border-radius:14px;
+    padding:16px 18px;margin-bottom:22px;font-size:.88rem;line-height:1.5;
+  }
+  .not-live strong{display:block;margin-bottom:.3em;color:var(--amber-deep);}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+  }
 </style>
 </head>
 <body>
 
-<div class="app">
+<!-- Access gate: visible by default, removed only after server-side verification -->
+<div class="gate" id="gate">
+  <div class="gate-inner" id="gateInner">
+    <div class="gate-spinner" id="gateSpinner"></div>
+    <h2 id="gateTitle">Just a moment…</h2>
+    <p id="gateMsg">Checking your access.</p>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
 
   <div class="topbar">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-4-2.4-8-5.8-8-10A5 5 0 0 1 12 7a5 5 0 0 1 8 4c0 4.2-4 7.6-8 10Z" stroke="#D98A3D" stroke-width="1.4"/><circle cx="12" cy="12" r="2" fill="#D98A3D"/></svg>
-      <div>Kindred Paws<small>Memorial page builder · prototype</small></div>
+      <div>Kindred Paws<small>Memorial page builder</small></div>
     </div>
-    <div class="reassure">Nothing here is public until you publish it, at the very last step.</div>
+    <div class="reassure">Nothing here is public until you publish it, at the very last step.<span class="save-status" id="saveStatus"></span></div>
   </div>
 
   <div class="stepper-wrap">
@@ -307,21 +354,22 @@
       </label>
     </section>
 
-    <!-- STEP 7 : CONDOLENCES -->
+    <!-- STEP 7 : GUESTBOOK -->
     <section class="step-panel" data-step="7" hidden>
-      <span class="eyebrow">Step 7 of 10 · Condolences</span>
+      <span class="eyebrow">Step 7 of 10 · Guestbook</span>
       <h2>Would you like others to leave a message?</h2>
       <p class="step-sub">You can turn this off, or close it, at any time.</p>
       <div class="switch-row">
-        <div><span class="lbl">Allow condolence messages</span></div>
+        <div><span class="lbl">Allow guestbook messages</span></div>
         <label class="switch"><input type="checkbox" id="condOn" checked><span class="slider"></span></label>
       </div>
       <div class="switch-row">
-        <div><span class="lbl">Review messages before they're shown</span><br><span class="sub">Recommended for public pages</span></div>
+        <div><span class="lbl">Review messages before they're shown</span><br><span class="sub">Recommended — links get forwarded, so even an unlisted page can reach people you didn't invite</span></div>
         <label class="switch"><input type="checkbox" id="modOn" checked><span class="slider"></span></label>
       </div>
+      <p class="step-sub" style="margin-top:1.4em;font-size:.88rem;">Lighting a candle is always available and always anonymous — there's no message attached, so there's nothing there to misuse.</p>
       <div class="field" style="margin-top:20px;">
-        <label for="closeAfter">Automatically close condolences</label>
+        <label for="closeAfter">Automatically close the guestbook</label>
         <select id="closeAfter">
           <option value="never">Never — leave it open</option>
           <option value="8w">After 8 weeks</option>
@@ -380,6 +428,7 @@
         <p class="step-sub" style="text-align:center;">You can still change anything — including who can see it — after publishing.</p>
         <div class="publish-box">
           <button class="btn btn-primary" id="publishBtn" type="button">Publish page</button>
+          <div class="publish-error" id="publishError" role="status" aria-live="polite"></div>
         </div>
       </div>
       <div id="postPublish" hidden>
@@ -413,8 +462,111 @@
 </div>
 
 <script>
+// ---------------------------------------------------------------------------
+// ACCESS GATE
+// The builder stays locked until Stripe confirms the €29 payment. Never trusts
+// the URL alone — the session_id is only a claim, verified server-side.
+//
+// INTERIM: the reference is kept in localStorage so a refresh or a closed tab
+// doesn't lock someone out of something they've paid for. This is a stopgap
+// until the magic-link + stored-record work lands; it's per-browser only, so
+// it won't survive a different device or cleared site data.
+// ---------------------------------------------------------------------------
 (function(){
-  const steps = ['Start','Details','Photo','Story','Memories','Privacy','Condolences','Celebration','Preview','Publish'];
+  const STORE_KEY = 'kp_memorial_access';
+  const gate = document.getElementById('gate');
+  const spinner = document.getElementById('gateSpinner');
+  const title = document.getElementById('gateTitle');
+  const msg = document.getElementById('gateMsg');
+
+  function lock(headline, body, showBuyLink, showSignIn){
+    spinner.hidden = true;
+    title.textContent = headline;
+    msg.textContent = body;
+    const inner = document.getElementById('gateInner');
+    if(showBuyLink){
+      const a = document.createElement('a');
+      a.className = 'btn btn-primary';
+      a.href = 'memorial.html';
+      a.textContent = 'See what\u2019s included';
+      inner.appendChild(a);
+    }
+    if(showSignIn){
+      const a = document.createElement('a');
+      a.className = 'btn btn-primary';
+      a.href = 'manage.html';
+      a.textContent = 'Email me a new link';
+      inner.appendChild(a);
+    }
+  }
+
+  function unlock(info){
+    window.KP_ACCESS = info;              // reference + email, for the save step later
+    gate.hidden = true;
+    document.getElementById('app').hidden = false;
+    document.dispatchEvent(new Event('kp-unlocked'));
+  }
+
+  const params = new URLSearchParams(location.search);
+  const urlSession = params.get('session_id');
+  const urlToken = params.get('token');
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch(e){}
+
+  // A magic-link token is exchanged for the reference before anything else,
+  // so someone can get back in on a device that has never seen this page.
+  if(urlToken){
+    fetch('/.netlify/functions/redeem-link?token=' + encodeURIComponent(urlToken))
+      .then(r => r.json().then(d => ({ok:r.ok, d})))
+      .then(({ok, d}) => {
+        if(ok && d.ok){
+          try { localStorage.setItem(STORE_KEY, JSON.stringify({reference:d.reference, email:d.email})); } catch(e){}
+          history.replaceState({}, '', location.pathname);
+          unlock({ reference:d.reference, email:d.email });
+        }else{
+          lock('That link has expired.',
+               'Sign-in links work once and last 30 minutes. You can request a fresh one.', false, true);
+        }
+      })
+      .catch(() => lock('We couldn\u2019t reach the server.', 'Please check your connection and refresh.', false, false));
+    return;
+  }
+
+  const sessionId = urlSession || (stored && stored.reference);
+
+  if(!sessionId){
+    lock('This page needs a memorial to work on.',
+         'Memorial pages are \u20ac29, once. If you already have one, we can email you a link back to it.',
+         true, true);
+    return;
+  }
+
+  fetch('/.netlify/functions/verify-memorial-access?session_id=' + encodeURIComponent(sessionId))
+    .then(r => r.json().then(d => ({ok:r.ok, d})))
+    .then(({ok, d}) => {
+      if(ok && d.paid){
+        try { localStorage.setItem(STORE_KEY, JSON.stringify({reference:d.reference, email:d.email})); } catch(e){}
+        // Drop the session id from the address bar so it isn't shared by accident.
+        if(urlSession) history.replaceState({}, '', location.pathname);
+        unlock(d);
+      } else if(d && d.reason === 'unpaid'){
+        lock('That payment didn\u2019t complete.',
+             'Nothing was charged. You can try again whenever you\u2019re ready.', true);
+      } else {
+        lock('We couldn\u2019t confirm this link.',
+             'If you\u2019ve already paid, use the link from your confirmation page or receipt email.', true);
+      }
+    })
+    .catch(() => {
+      lock('We couldn\u2019t reach the server.',
+           'Please check your connection and refresh the page.', false);
+    });
+})();
+</script>
+
+<script>
+(function(){
+  const steps = ['Start','Details','Photo','Story','Memories','Privacy','Guestbook','Celebration','Preview','Publish'];
   const total = steps.length;
   let current = 1;
   let maxReached = 1;
@@ -480,33 +632,34 @@
     const disp = state.name.trim() || 'them';
     ['nameEcho2','nameEcho9','nameEcho10'].forEach(id=>{ document.getElementById(id).textContent = disp; });
     validateStep();
+    queueSave();
   });
 
   // ---------- step 2 : details ----------
-  document.getElementById('species').addEventListener('change', e=> state.species = e.target.value);
-  document.getElementById('born').addEventListener('change', e=> state.born = e.target.value);
-  document.getElementById('died').addEventListener('change', e=> state.died = e.target.value);
-  document.getElementById('lovedBy').addEventListener('input', e=> state.lovedBy = e.target.value);
+  document.getElementById('species').addEventListener('change', e=>{ state.species = e.target.value; queueSave(); });
+  document.getElementById('born').addEventListener('change', e=>{ state.born = e.target.value; queueSave(); });
+  document.getElementById('died').addEventListener('change', e=>{ state.died = e.target.value; queueSave(); });
+  document.getElementById('lovedBy').addEventListener('input', e=>{ state.lovedBy = e.target.value; queueSave(); });
 
   // ---------- step 3 : photo ----------
   const heroFile = document.getElementById('hero-file');
   const heroPreview = document.getElementById('heroPreview');
   document.getElementById('heroDrop').addEventListener('click', ()=> heroFile.click());
-  heroFile.addEventListener('change', e=>{
+  heroFile.addEventListener('change', async e=>{
     const f = e.target.files[0]; if(!f) return;
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      state.photo = ev.target.result;
+    heroPreview.textContent = '…';
+    try{
+      state.photo = await resizeImage(f, 900, 0.85);
       heroPreview.style.backgroundImage = 'url(' + state.photo + ')';
       heroPreview.textContent = '';
-    };
-    reader.readAsDataURL(f);
+      queueSave();
+    }catch(err){ heroPreview.textContent = '🐾'; }
   });
   document.getElementById('skipPhoto').addEventListener('click', ()=> goTo(4));
 
   // ---------- step 4 : story ----------
   const storyEl = document.getElementById('story');
-  storyEl.addEventListener('input', e=> state.story = e.target.value);
+  storyEl.addEventListener('input', e=>{ state.story = e.target.value; queueSave(); });
   document.querySelectorAll('.chip').forEach(chip=>{
     chip.addEventListener('click', ()=>{
       const prompt = chip.dataset.prompt;
@@ -515,6 +668,7 @@
       state.story = insert;
       storyEl.focus();
       storyEl.setSelectionRange(insert.length, insert.length);
+      queueSave();
     });
   });
 
@@ -522,12 +676,15 @@
   const memFiles = document.getElementById('memory-files');
   const thumbsEl = document.getElementById('thumbs');
   document.getElementById('memDrop').addEventListener('click', ()=> memFiles.click());
-  memFiles.addEventListener('change', e=>{
-    [...e.target.files].slice(0, 8 - state.memories.length).forEach(f=>{
-      const reader = new FileReader();
-      reader.onload = ev=>{ state.memories.push(ev.target.result); renderThumbs(); };
-      reader.readAsDataURL(f);
-    });
+  memFiles.addEventListener('change', async e=>{
+    const files = [...e.target.files].slice(0, 8 - state.memories.length);
+    for(const f of files){
+      try{
+        state.memories.push(await resizeImage(f, 1200, 0.82));
+        renderThumbs();
+      }catch(err){ /* skip anything the browser can't decode */ }
+    }
+    queueSave();
   });
   function renderThumbs(){
     thumbsEl.innerHTML = '';
@@ -537,7 +694,7 @@
       d.style.backgroundImage = 'url(' + src + ')';
       const btn = document.createElement('button');
       btn.type = 'button'; btn.textContent = '×'; btn.setAttribute('aria-label','Remove photo');
-      btn.addEventListener('click', ()=>{ state.memories.splice(i,1); renderThumbs(); });
+      btn.addEventListener('click', ()=>{ state.memories.splice(i,1); renderThumbs(); queueSave(); });
       d.appendChild(btn);
       thumbsEl.appendChild(d);
     });
@@ -550,13 +707,14 @@
       card.classList.add('selected');
       card.querySelector('input').checked = true;
       state.privacy = card.dataset.val;
+      queueSave();
     });
   });
 
   // ---------- step 7 : condolences ----------
-  document.getElementById('condOn').addEventListener('change', e=> state.condOn = e.target.checked);
-  document.getElementById('modOn').addEventListener('change', e=> state.modOn = e.target.checked);
-  document.getElementById('closeAfter').addEventListener('change', e=> state.closeAfter = e.target.value);
+  document.getElementById('condOn').addEventListener('change', e=>{ state.condOn = e.target.checked; queueSave(); });
+  document.getElementById('modOn').addEventListener('change', e=>{ state.modOn = e.target.checked; queueSave(); });
+  document.getElementById('closeAfter').addEventListener('change', e=>{ state.closeAfter = e.target.value; queueSave(); });
 
   // ---------- step 8 : celebration ----------
   const celebNow = document.getElementById('celebNow');
@@ -572,12 +730,12 @@
     celebLater.classList.add('selected'); celebNow.classList.remove('selected');
     celebForm.hidden = true;
   });
-  document.getElementById('celebTitle').addEventListener('input', e=> state.celebTitle = e.target.value);
-  document.getElementById('celebDate').addEventListener('change', e=> state.celebDate = e.target.value);
-  document.getElementById('celebLoc').addEventListener('input', e=> state.celebLoc = e.target.value);
-  document.getElementById('celebKids').addEventListener('change', e=> state.celebKids = e.target.checked);
-  document.getElementById('celebMemory').addEventListener('change', e=> state.celebMemory = e.target.checked);
-  document.getElementById('celebDonations').addEventListener('change', e=> state.celebDonations = e.target.checked);
+  document.getElementById('celebTitle').addEventListener('input', e=>{ state.celebTitle = e.target.value; queueSave(); });
+  document.getElementById('celebDate').addEventListener('change', e=>{ state.celebDate = e.target.value; queueSave(); });
+  document.getElementById('celebLoc').addEventListener('input', e=>{ state.celebLoc = e.target.value; queueSave(); });
+  document.getElementById('celebKids').addEventListener('change', e=>{ state.celebKids = e.target.checked; queueSave(); });
+  document.getElementById('celebMemory').addEventListener('change', e=>{ state.celebMemory = e.target.checked; queueSave(); });
+  document.getElementById('celebDonations').addEventListener('change', e=>{ state.celebDonations = e.target.checked; queueSave(); });
 
   // ---------- step 9 : preview ----------
   function renderPreview(){
@@ -598,9 +756,15 @@
       html += '<div class="preview-section-label">Gallery</div>';
       html += '<div class="preview-gallery">' + state.memories.map(m=>'<div style="background-image:url('+m+')"></div>').join('') + '</div>';
     }
+    // Candles appear on every published page — no setup, nothing to configure.
+    html += '<div class="preview-section-label">Candles</div>';
+    html += '<div class="preview-candles">🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️🕯️<span>lit by visitors</span></div>';
     if(state.condOn){
-      html += '<div class="preview-section-label">Condolences</div>';
+      html += '<div class="preview-section-label">Guestbook</div>';
       html += '<div class="preview-condolence">"Thinking of you all — ' + name + ' was one in a million."</div>';
+      if(state.modOn){
+        html += '<div class="preview-modnote">Messages wait for your approval before they appear here.</div>';
+      }
     }
     if(state.celebEnabled){
       html += '<div class="preview-section-label">Life celebration</div>';
@@ -612,6 +776,152 @@
   }
   function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+  // ---------- persistence ----------
+  // Photos are resized in the browser before saving. A modern phone photo is
+  // several megabytes; unresized, eight of them would make a record too large
+  // to store and painfully slow to load on the memorial page itself.
+  function resizeImage(file, maxDim, quality){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('decode failed'));
+        img.onload = () => {
+          let { width, height } = img;
+          if(width > maxDim || height > maxDim){
+            const scale = maxDim / Math.max(width, height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const saveStatus = document.getElementById('saveStatus');
+  let saveTimer = null;
+  let saving = false;
+
+  function setSaveStatus(text, tone){
+    saveStatus.textContent = text;
+    saveStatus.dataset.tone = tone || '';
+  }
+
+  function payload(){
+    return {
+      reference: (window.KP_ACCESS && window.KP_ACCESS.reference) || null,
+      email: (window.KP_ACCESS && window.KP_ACCESS.email) || null,
+      name: state.name, species: state.species, born: state.born, died: state.died,
+      lovedBy: state.lovedBy, photo: state.photo, story: state.story,
+      memories: state.memories, privacy: state.privacy,
+      guestbookOn: state.condOn, moderationOn: state.modOn, closeAfter: state.closeAfter,
+      celebEnabled: state.celebEnabled, celebTitle: state.celebTitle,
+      celebDate: state.celebDate, celebLoc: state.celebLoc,
+      celebKids: state.celebKids, celebMemory: state.celebMemory,
+      celebDonations: state.celebDonations
+    };
+  }
+
+  async function saveNow(){
+    if(saving || !window.KP_ACCESS) return;
+    saving = true;
+    setSaveStatus('Saving…');
+    try{
+      const res = await fetch('/.netlify/functions/save-memorial', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload())
+      });
+      const d = await res.json();
+      if(!res.ok || !d.ok) throw new Error(d.error || 'save failed');
+      state.id = d.id;
+      setSaveStatus('Saved', 'ok');
+    }catch(err){
+      setSaveStatus("Couldn't save — we'll keep trying", 'warn');
+    }finally{
+      saving = false;
+    }
+  }
+
+  // Debounced: typing a story shouldn't fire a request per keystroke.
+  window.queueSave = function(){
+    setSaveStatus('');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 1200);
+  };
+
+  async function loadExisting(){
+    if(!window.KP_ACCESS) return;
+    try{
+      const res = await fetch('/.netlify/functions/load-memorial?reference=' +
+        encodeURIComponent(window.KP_ACCESS.reference));
+      const d = await res.json();
+      if(!d.ok || !d.memorial) return;
+      const m = d.memorial;
+      Object.assign(state, {
+        id:m.id, name:m.name||'', species:m.species||'', born:m.born||'', died:m.died||'',
+        lovedBy:m.lovedBy||'', photo:m.photo||null, story:m.story||'', memories:m.memories||[],
+        privacy:m.privacy||'unlisted', condOn:m.guestbookOn !== false, modOn:m.moderationOn !== false,
+        closeAfter:m.closeAfter||'never', celebEnabled:!!m.celebEnabled, celebTitle:m.celebTitle||'',
+        celebDate:m.celebDate||'', celebLoc:m.celebLoc||'', celebKids:!!m.celebKids,
+        celebMemory:m.celebMemory !== false, celebDonations:!!m.celebDonations,
+        published:!!m.published, slug:m.slug||null
+      });
+      hydrateForm();
+      if(m.published) showPublished(m.slug);
+      if(m.name) setSaveStatus('Draft restored', 'ok');
+    }catch(e){ /* a fresh start is the correct fallback */ }
+  }
+
+  function hydrateForm(){
+    document.getElementById('petName').value = state.name;
+    document.getElementById('species').value = state.species;
+    document.getElementById('born').value = state.born;
+    document.getElementById('died').value = state.died;
+    document.getElementById('lovedBy').value = state.lovedBy;
+    document.getElementById('story').value = state.story;
+    document.getElementById('condOn').checked = state.condOn;
+    document.getElementById('modOn').checked = state.modOn;
+    document.getElementById('closeAfter').value = state.closeAfter;
+    if(state.photo){
+      const p = document.getElementById('heroPreview');
+      p.style.backgroundImage = 'url(' + state.photo + ')';
+      p.textContent = '';
+    }
+    document.querySelectorAll('.privacy-card').forEach(c=>{
+      const on = c.dataset.val === state.privacy;
+      c.classList.toggle('selected', on);
+      c.querySelector('input').checked = on;
+    });
+    if(state.celebEnabled){
+      document.getElementById('celebNow').classList.add('selected');
+      document.getElementById('celebLater').classList.remove('selected');
+      document.getElementById('celebForm').hidden = false;
+      document.getElementById('celebTitle').value = state.celebTitle;
+      document.getElementById('celebDate').value = state.celebDate;
+      document.getElementById('celebLoc').value = state.celebLoc;
+    }
+    renderThumbs();
+    validateStep();
+  }
+
+  function showPublished(slug){
+    document.getElementById('prePublish').hidden = true;
+    document.getElementById('postPublish').hidden = false;
+    const link = location.origin + '/remember.html?p=' + slug;
+    document.getElementById('pageLink').value = link;
+    drawFakeQR(document.getElementById('qrCanvas'), link);
+    const name = state.name.trim() || 'them';
+    document.getElementById('shareText1').textContent = 'We made a page to remember ' + name + ' — ' + link;
+    document.getElementById('shareText2').textContent = 'Hi — I wanted to share a page we made to remember ' + name + '. You can see it here: ' + link;
+  }
+
   // ---------- step 10 : publish ----------
   function resetPublishView(){
     if(!state.published){
@@ -619,18 +929,25 @@
       document.getElementById('postPublish').hidden = true;
     }
   }
-  document.getElementById('publishBtn').addEventListener('click', ()=>{
-    state.published = true;
-    document.getElementById('prePublish').hidden = true;
-    document.getElementById('postPublish').hidden = false;
-    const slug = (state.name.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'their-story');
-    const rand = Math.random().toString(36).slice(2,6);
-    const link = 'kindredpaws.com/remember/' + slug + '-' + rand;
-    document.getElementById('pageLink').value = link;
-    drawFakeQR(document.getElementById('qrCanvas'), link);
-    const name = state.name.trim() || 'them';
-    document.getElementById('shareText1').textContent = 'We made a page to remember ' + name + ' — ' + link;
-    document.getElementById('shareText2').textContent = 'Hi — I wanted to share a page we made to remember ' + name + '. You can see it here: ' + link;
+  document.getElementById('publishBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('publishBtn');
+    btn.disabled = true; btn.textContent = 'Publishing…';
+    try{
+      await saveNow();
+      const res = await fetch('/.netlify/functions/publish-memorial', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ reference: window.KP_ACCESS.reference, published:true })
+      });
+      const d = await res.json();
+      if(!res.ok || !d.ok) throw new Error(d.error || 'publish failed');
+      state.published = true; state.slug = d.slug;
+      showPublished(d.slug);
+    }catch(err){
+      document.getElementById('publishError').textContent =
+        (err.message === 'Add their name before publishing.')
+          ? err.message : "That didn't work — please try again in a moment.";
+      btn.disabled = false; btn.textContent = 'Publish page';
+    }
   });
 
   document.getElementById('copyLink').addEventListener('click', function(){ copyText(document.getElementById('pageLink').value, this); });
@@ -681,6 +998,10 @@
 
   refreshCrumbs();
   validateStep();
+
+  // Draft restore waits for the gate: there's no reference to load against until then.
+  if(window.KP_ACCESS) loadExisting();
+  else document.addEventListener('kp-unlocked', loadExisting, { once:true });
 })();
 </script>
 
