@@ -12,13 +12,17 @@
 import Stripe from "stripe";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import fs from "fs";
-import path from "path";
 import { fileURLToPath } from "url";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATE_PATH = path.join(__dirname, "assets", "booklet-template.pdf");
+// Not `const __dirname = path.dirname(fileURLToPath(import.meta.url))` —
+// Netlify's esbuild bundling step injects its own __dirname for CommonJS
+// compatibility, and a manually-declared one in the same scope collided
+// with it at runtime ("Identifier '__dirname' has already been declared").
+// Resolving the path straight from a relative URL sidesteps needing
+// __dirname at all.
+const TEMPLATE_PATH = fileURLToPath(new URL("./assets/booklet-template.pdf", import.meta.url));
 
 const AMBER = rgb(0xd9 / 255, 0x8a / 255, 0x3d / 255);
 const PAPER_MUTED = rgb(0xa9 / 255, 0xc4 / 255, 0xbc / 255);
